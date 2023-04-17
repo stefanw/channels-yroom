@@ -1,0 +1,103 @@
+# Channels-Yroom
+
+Django Channels Websocket consumer and worker for the Yjs network protocol
+
+`channels-yroom` implements the network protocol for Yjs doc synchronization and awareness updates and makes them available as a Django Channels Websocket consumer and worker.
+
+## Get started
+
+1. Add `channels` and `channels_yroom` to `INSTALLED_APPS` in your settings.
+
+2. Set up your websocket consumer.
+
+   These can be quite simple
+
+   ```python
+
+    from channels_yroom.consumer import YroomConsumer
+
+    class TextCollaborationConsumer(YroomConsumer):
+        def get_room_group_name(self) -> str:
+            """
+            Determine a unique name for this room, e.g. based on URL
+            """
+            room_name = self.scope["url_route"]["kwargs"]["room_name"]
+            return "textcollab_%s" % room_name
+
+        async def connect(self) -> None:
+            """
+            Optional: perform some sort of authentication
+            Call .join_room() to connect client to document
+            """
+            user = self.scope["user"]
+            if not user.is_staff:
+                await self.close()
+                return
+
+            await super().connect()
+    ```
+
+3. Hook your websocket patterns in your `asgi.py` and add a `"channel"` protocol router for the `"yroom"` channel name:
+
+    ```python
+    # ...
+    application = ProtocolTypeRouter(
+        {
+            "http": get_asgi_application(),
+            "websocket": AllowedHostsOriginValidator(
+                AuthMiddlewareStack(URLRouter(textcollab.routing.websocket_urlpatterns))
+            ),
+            "channel": ChannelNameRouter(
+                {
+                    "yroom": YRoomChannelConsumer.as_asgi(),
+                }
+            ),
+        }
+    )
+    ```
+
+4. In addition to your webserver with websockets support (e.g. daphne or uvicorn), you need to run a [channels worker](https://channels.readthedocs.io/en/stable/topics/worker.html). You can run the `yroom` worker implementation that supports graceful shutdown:
+
+    ```sh
+    python manage.py yroom
+    ```
+
+
+## How it works
+
+Yjs clients connect via Websocket to a Channels Websocket Consumer which can perform e.g. authentication and then forwards messages via channel layer to a central worker. This worker runs in a separate process and keeps a Yjs document + awareness information for each 'room', processes synchronization and awareness updates and sends responses (single and broadcast to room) to the Websocket consumers.
+
+
+### Example flow
+
+```mermaid
+sequenceDiagram
+    participant Alice
+    participant WebsocketConsumerA
+    participant Yroom Worker
+    participant WebsocketConsumerB
+    participant Bob
+    Alice->>+WebsocketConsumerA: connect
+    WebsocketConsumerA->>+Yroom Worker: connect
+    Yroom Worker->>+WebsocketConsumerA: sync1
+    WebsocketConsumerA->>+Alice: forward sync1
+    Alice->>+WebsocketConsumerA: sync2
+    WebsocketConsumerA->>+Yroom Worker: forward sync2
+
+    Bob->>WebsocketConsumerB: connect
+    WebsocketConsumerB->>+Yroom Worker: connect
+    Yroom Worker->>+WebsocketConsumerB: sync1
+    WebsocketConsumerB->>+Bob: forward sync1
+    Bob->>+WebsocketConsumerB: sync2
+    WebsocketConsumerB->>+Yroom Worker: forward sync2
+    Bob->>+WebsocketConsumerB: update from Bob
+    WebsocketConsumerB->>+Yroom Worker: forward update from Bob        
+
+    par
+        Yroom Worker->>WebsocketConsumerA: broadcast update
+        WebsocketConsumerA->>Alice: forward update
+    and
+        Yroom Worker->>WebsocketConsumerB: broadcast update
+        WebsocketConsumerB->>Bob: forward update
+    end
+```
