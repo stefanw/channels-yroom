@@ -1,16 +1,16 @@
 # Channels-Yroom
 
-Django Channels Websocket consumer and worker for the Yjs network protocol
-
-`channels-yroom` implements the network protocol for Yjs doc synchronization and awareness updates and makes them available as a Django Channels Websocket consumer and worker.
+`channels-yroom` is a Django Channels WebSocket consumer and worker for synchronizing Yjs clients. It implements the network protocol for Yjs doc synchronization and awareness updates and makes them available as Django Channels WebSocket consumer and worker.
 
 ## Get started
 
-1. Add `channels` and `channels_yroom` to `INSTALLED_APPS` in your settings.
+1. Install:
 
-2. Set up your websocket consumer.
+    `pip install channels-yroom`
 
-   These can be quite simple
+2. Add `channels` and `channels_yroom` to `INSTALLED_APPS` in your settings.
+
+3. Set up your WebSocket consumer in `consumers.py`.
 
    ```python
 
@@ -27,7 +27,6 @@ Django Channels Websocket consumer and worker for the Yjs network protocol
         async def connect(self) -> None:
             """
             Optional: perform some sort of authentication
-            Call .join_room() to connect client to document
             """
             user = self.scope["user"]
             if not user.is_staff:
@@ -37,7 +36,7 @@ Django Channels Websocket consumer and worker for the Yjs network protocol
             await super().connect()
     ```
 
-3. Hook your websocket patterns in your `asgi.py` and add a `"channel"` protocol router for the `"yroom"` channel name:
+4. Hook your WebSocket patterns in your `asgi.py` and add a `"channel"` protocol router for the `"yroom"` channel name:
 
     ```python
     # ...
@@ -56,7 +55,7 @@ Django Channels Websocket consumer and worker for the Yjs network protocol
     )
     ```
 
-4. In addition to your webserver with websockets support (e.g. daphne or uvicorn), you need to run a [channels worker](https://channels.readthedocs.io/en/stable/topics/worker.html). You can run the `yroom` worker implementation that supports graceful shutdown:
+5. In addition to your webserver with WebSockets support (e.g. daphne or uvicorn), you need to run a [channels worker](https://channels.readthedocs.io/en/stable/topics/worker.html). You can run the `yroom` worker implementation that supports graceful shutdown:
 
     ```sh
     python manage.py yroom
@@ -65,7 +64,7 @@ Django Channels Websocket consumer and worker for the Yjs network protocol
 
 ## How it works
 
-Yjs clients connect via Websocket to a Channels Websocket Consumer which can perform e.g. authentication and then forwards messages via channel layer to a central worker. This worker runs in a separate process and keeps a Yjs document + awareness information for each 'room', processes synchronization and awareness updates and sends responses (single and broadcast to room) to the Websocket consumers.
+Yjs clients connect via WebSockets to a Channels WebSocket Consumer which can perform e.g. authentication and then forwards messages via channel layer to a central worker. This worker runs in a separate process and keeps a Yjs document + awareness information for each 'room', processes synchronization and awareness updates and sends responses (single and broadcast to room) to the WebSocket consumers.
 
 
 ### Example flow
