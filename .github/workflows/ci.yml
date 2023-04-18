@@ -26,7 +26,7 @@ jobs:
         python -m pip install hatch
 
     - name: Lint
-      run: hatch env run lint:check
+      run: hatch run lint:check
 
     - name: Tests
       run: hatch run +py=${{ matrix.python-version }} test:test
