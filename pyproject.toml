@@ -70,8 +70,8 @@ path = "channels_yroom/__about__.py"
 packages = ["channels_yroom"]
 
 [tool.hatch.envs.test.scripts]
-cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=channels_yroom --cov=tests {args}"
-no-cov = "cov --no-cov {args}"
+test = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=channels_yroom --cov=tests {args}"
+no-cov = "test --no-cov {args}"
 
 [[tool.hatch.envs.test.matrix]]
 python = ["3.7", "3.8", "3.9", "3.10", "3.11"]
