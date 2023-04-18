@@ -23,9 +23,6 @@ class YroomConsumer(AsyncWebsocketConsumer):
         return random.getrandbits(64)
 
     async def connect(self) -> None:
-        # import ipdb
-
-        # ipdb.set_trace()
         await self.join_room()
 
     async def join_room(self) -> None:
