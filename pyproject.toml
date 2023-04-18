@@ -69,7 +69,7 @@ path = "channels_yroom/__about__.py"
 [tool.hatch.build.targets.wheel]
 packages = ["channels_yroom"]
 
-[tool.hatch.envs.default.scripts]
+[tool.hatch.envs.test.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=channels_yroom --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
 
