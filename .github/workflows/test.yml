@@ -9,10 +9,10 @@ on:
 jobs:
   lint:
     - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python 3.11
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: "3.11"
 
     - name: Install hatch
       run: |
@@ -23,6 +23,7 @@ jobs:
 
   test:
     name: "Run tests"
+    needs: [lint]
     runs-on: ubuntu-latest
     strategy:
       matrix:
