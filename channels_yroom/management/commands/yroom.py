@@ -1,10 +1,9 @@
 import logging
 
-from django.core.management import BaseCommand, CommandError
-
 from channels import DEFAULT_CHANNEL_LAYER
 from channels.layers import get_channel_layer
 from channels.routing import get_default_application
+from django.core.management import BaseCommand, CommandError
 
 from ...conf import settings
 from ...worker import YroomWorker

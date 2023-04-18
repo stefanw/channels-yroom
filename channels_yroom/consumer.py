@@ -1,5 +1,5 @@
-import random
 import logging
+import random
 from typing import Optional
 
 from channels.generic.websocket import AsyncWebsocketConsumer

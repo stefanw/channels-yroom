@@ -1,11 +1,10 @@
-from typing import Protocol, Optional
-
-from django.utils.module_loading import import_string
+from typing import Optional, Protocol
 
 from asgiref.sync import sync_to_async
+from django.utils.module_loading import import_string
 
-from .models import YDocUpdate
 from .conf import settings
+from .models import YDocUpdate
 
 
 class YDocStorage(Protocol):

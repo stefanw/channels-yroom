@@ -1,12 +1,11 @@
 import pytest
-
 from asgiref.testing import ApplicationCommunicator
 from channels.layers import get_channel_layer
 from channels.testing import WebsocketCommunicator
 
-from channels_yroom.consumer import YroomConsumer
-from channels_yroom.conf import settings
 from channels_yroom.channel import YRoomChannelConsumer
+from channels_yroom.conf import settings
+from channels_yroom.consumer import YroomConsumer
 from channels_yroom.models import YDocUpdate
 
 

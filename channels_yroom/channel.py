@@ -5,7 +5,7 @@ from channels.consumer import AsyncConsumer
 from yroom import YRoomManager, YRoomMessage
 
 from .conf import settings
-from .storage import get_ydoc_storage, YDocStorage
+from .storage import YDocStorage, get_ydoc_storage
 from .utils import YroomChannelMessage, get_connection_group_name
 
 logger = logging.getLogger(__name__)
