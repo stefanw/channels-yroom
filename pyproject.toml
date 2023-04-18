@@ -31,14 +31,31 @@ dependencies = [
 ]
 dynamic = ["version"]
 
-[project.optional-dependencies]
-test = [
+[tool.hatch.envs.test]
+dependencies = [
   "async-timeout",
-  "pytest",
+  "daphne",
   "pytest-asyncio",
   "pytest-cov",
   "pytest-django",
-  "daphne",
+  "pytest",
+]
+
+[tool.hatch.envs.lint]
+skip-install = true
+detached = true
+dependencies = [
+  "black",
+  "isort",
+  "flake8",
+  "Flake8-pyproject",
+]
+
+[tool.hatch.envs.lint.scripts]
+check = [
+  "flake8 channels_yroom tests",
+  "black --check --diff channels_yroom tests",
+  "isort --check-only --diff channels_yroom tests",
 ]
 
 [project.urls]
@@ -49,12 +66,15 @@ Source = "https://github.com/stefanw/channels-yroom"
 [tool.hatch.version]
 path = "channels_yroom/__about__.py"
 
+[tool.hatch.build.targets.wheel]
+packages = ["channels_yroom"]
+
 [tool.hatch.envs.default.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=channels_yroom --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
 
 [[tool.hatch.envs.test.matrix]]
-python = ["37", "38", "39", "310", "311"]
+python = ["3.7", "3.8", "3.9", "3.10", "3.11"]
 
 [tool.coverage.run]
 branch = true
@@ -69,3 +89,10 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+
+[tool.flake8]
+extend-ignore = ['E203']
+max-line-length = 88
+
+[tool.isort]
+profile = 'black'
