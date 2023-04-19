@@ -62,6 +62,18 @@
     ```
 
 
+## Showcase: text collaboration example
+
+The `example` folder contains a simple project that uses `y-prosemirror` to allow for realtime collaboration on rich text.
+
+Run the included Docker compose file to check it out:
+
+```sh
+docker compose up
+# Then visit localhost:8000
+```
+
+
 ## How it works
 
 Yjs clients connect via WebSockets to a Channels WebSocket Consumer which can perform e.g. authentication and then forwards messages via channel layer to a central worker. This worker runs in a separate process and keeps a Yjs document + awareness information for each 'room', processes synchronization and awareness updates and sends responses (single and broadcast to room) to the WebSocket consumers.

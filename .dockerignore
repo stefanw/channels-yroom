@@ -1,0 +1,5 @@
+example/node_modules
+example/.venv
+example/db.sqlite3
+example/public
+__pycache__

@@ -1,0 +1,19 @@
+{
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^3.2.5"
+  },
+  "dependencies": {
+    "prosemirror-example-setup": "^1.2.1",
+    "prosemirror-model": "^1.18.3",
+    "prosemirror-state": "^1.4.2",
+    "prosemirror-view": "^1.29.1",
+    "y-prosemirror": "^1.2.0",
+    "y-websocket": "^1.4.5",
+    "yjs": "^13.5.43"
+  }
+}

@@ -1,0 +1,39 @@
+version: '3'
+
+x-app-defaults:
+  &app_defaults
+  build: .
+  init: true
+  links:
+    - broker
+  environment:
+    - REDIS_HOST=broker
+  depends_on:
+    - broker
+
+services:
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
+      - "DJANGO_DEBUG=0"
+  broker:
+    image: redis:5
+    volumes:
+      - "redis-data:/data"
+  app:
+    <<: *app_defaults
+    command: "uvicorn --host 0.0.0.0 textcollab_project.asgi:application"
+    ports:
+      - "127.0.0.1:8000:8000"
+    expose:
+      - 8000
+  worker:
+    <<: *app_defaults
+    command: "python manage.py yroom"
+
+volumes:
+  redis-data: {}
+  postgres_data: {}
