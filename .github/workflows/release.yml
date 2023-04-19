@@ -1,8 +1,9 @@
 name: "Release"
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
   test:
@@ -41,16 +42,6 @@ jobs:
     - name: Install hatch
       run: |
         python -m pip install hatch
-    - name: Install dependencies
-      run: |
-        pip install setuptools wheel twine build
-    - name: Publish
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-      run: |
-        python -m build
-        twine upload dist/*
 
     - name: Build dist
       run: hatch build
