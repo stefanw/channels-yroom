@@ -10,5 +10,6 @@
 <body>
     {{ room_name|json_script:"room-name" }}
     {% vite_asset 'frontend/main.js' %}
+    <a href="{% url 'save_room' room_name=room_name %}">Get Room Content</a>
 </body>
 </html>
