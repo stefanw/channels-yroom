@@ -1,6 +1,6 @@
 import json
 from enum import Enum
-from typing import Any, List, Optional, TypedDict
+from typing import Any, Dict, List, Optional, TypedDict
 
 from channels.layers import get_channel_layer
 from django.conf import settings
@@ -51,7 +51,7 @@ class YroomDocument:
         if channel_layer is None:
             self.channel_layer = get_channel_layer()
 
-    async def get_map(self, name: str) -> Optional[dict[str, Any]]:
+    async def get_map(self, name: str) -> Optional[Dict[str, Any]]:
         return await self._send_json_rpc("get_map", [name])
 
     async def get_array(self, name: str) -> Optional[List[Any]]:
