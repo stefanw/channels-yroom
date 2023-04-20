@@ -26,6 +26,11 @@ class YRoomChannelConsumer(AsyncConsumer):
         room_name = message["room"]
         conn_id = message["conn_id"]
         logger.debug("yroom consumer connect %s %s", room_name, conn_id)
+
+        # Cancel room cleanup task if it exists
+        if room_name in self.cleanup_tasks:
+            self.cleanup_tasks[room_name].cancel()
+
         result = None
         if not self.room_manager.has_room(room_name):
             result = await self.create_room_from_snapshot(room_name, conn_id)
@@ -131,7 +136,7 @@ class YRoomChannelConsumer(AsyncConsumer):
             logger.debug("Room %s is empty", room_name)
             await self.schedule_room_removal(room_name)
         if send_response:
-        await self.respond(conn_id, room_name, result)
+            await self.respond(conn_id, room_name, result)
 
     async def schedule_room_removal(self, room_name: str):
         if room_name in self.cleanup_tasks:
@@ -151,7 +156,7 @@ class YRoomChannelConsumer(AsyncConsumer):
             return
         logger.debug("Snapshot room %s", room_name)
         await self.snapshot_room(room_name)
-        logger.debug("Remove dead room %s", room_name)
+        logger.debug("Remove empty room %s", room_name)
         if not self.room_manager.is_room_alive(room_name):
             self.force_remove_room(room_name)
 
@@ -160,6 +165,9 @@ class YRoomChannelConsumer(AsyncConsumer):
 
     async def snapshot_room(self, room_name: str):
         ydoc_bytes = self.room_manager.serialize_room(room_name)
+        logger.debug(
+            "Snapshot room %s with %s bytes", room_name, len(ydoc_bytes or b"")
+        )
         if ydoc_bytes is None:
             # Room is gone!
             return
@@ -175,7 +183,6 @@ class YRoomChannelConsumer(AsyncConsumer):
         logger.debug("Cleaned up tasks")
         for room_name in self.room_manager.list_rooms():
             logger.debug("Saving snapshot for %s", room_name)
-            snapshot = self.room_manager.serialize_room(room_name)
-            await self.storage.save_snapshot(room_name, snapshot)
+            await self.snapshot_room(room_name)
         logger.debug("Done saving snapshots")
         await self.send({"type": "shutdown.complete"})
