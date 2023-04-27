@@ -38,7 +38,7 @@ class YroomChannelRPCMessage(TypedDict):
 
 class YroomChannelRPCResponse(TypedDict):
     type: str
-    result: Any
+    result: Optional[str]
 
 
 def get_connection_group_name(conn_id) -> str:

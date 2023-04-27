@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+from typing import Optional
 
 from channels.consumer import AsyncConsumer
 from yroom import YRoomManager, YRoomMessage
@@ -39,7 +40,9 @@ class YRoomChannelConsumer(AsyncConsumer):
             result = self.room_manager.connect(room_name, conn_id)
         await self.respond(conn_id, room_name, result)
 
-    async def create_room_from_snapshot(self, room_name: str, conn_id: int = 0) -> None:
+    async def create_room_from_snapshot(
+        self, room_name: str, conn_id: int = 0
+    ) -> Optional[YRoomMessage]:
         logger.debug("yroom connect, no room yet %s %s", room_name, conn_id)
         snapshot = await self.storage.get_snapshot(room_name)
         if snapshot:
