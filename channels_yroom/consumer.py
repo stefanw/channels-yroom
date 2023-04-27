@@ -16,8 +16,13 @@ logger = logging.getLogger(__name__)
 
 
 class YroomConsumer(AsyncWebsocketConsumer):
+    room_name_prefix: str = "yroom"
+    room_url_kwargs: str = "room_name"
+
+
     def get_room_group_name(self) -> str:
-        return "yroom_default"
+        room_name = self.scope["url_route"]["kwargs"][self.room_url_kwargs]
+        return f"{self.room_name_prefix}_{room_name}"
 
     def get_connection_id(self) -> int:
         return random.getrandbits(64)
