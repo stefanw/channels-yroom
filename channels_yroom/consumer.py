@@ -38,11 +38,13 @@ class YRoomConsumerHooks:
 
 class YroomConsumer(AsyncWebsocketConsumer, YRoomConsumerHooks):
     room_name_prefix: str = "yroom"
-    room_url_kwargs: str = "room_name"
+    room_url_kwargs: str | None = None
 
 
     def get_room_group_name(self) -> str:
-        room_name = self.scope["url_route"]["kwargs"][self.room_url_kwargs]
+        room_name = "default"
+        if self.room_url_kwargs is not None:
+            room_name = self.scope["url_route"]["kwargs"][self.room_url_kwargs]
         return f"{self.room_name_prefix}_{room_name}"
 
     def get_connection_id(self) -> int:
