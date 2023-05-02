@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 
-from channels_yroom.utils import YroomDocument
+from channels_yroom.proxy import YroomDocument
 
 from .consumers import get_room_group_name
 
