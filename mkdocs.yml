@@ -1,0 +1,24 @@
+site_name: Channels-Yroom
+theme:
+  name: readthedocs
+  highlightjs: true
+plugins:
+  - search
+  - mermaid2
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        # # See: https://mkdocstrings.github.io/python/usage/
+        python:
+          options:
+            show_source: false
+            show_root_heading: false
+            heading_level: 3
+
+nav:
+  - "Channels-Yroom": 'index.md'
+  - "Getting started": 'tutorial.md'
+  - "How-To": 'howto.md'
+  - "Settings": 'settings.md'
+  - "API Reference": 'api.md'
+  - "Explanation": 'explanation.md'

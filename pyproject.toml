@@ -39,6 +39,11 @@ dependencies = [
   "pytest",
 ]
 
+[tool.hatch.envs.docs]
+dependencies = [
+  "mkdocs",
+]
+
 [tool.hatch.envs.lint]
 skip-install = true
 detached = true
