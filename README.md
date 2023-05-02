@@ -17,6 +17,11 @@
     from channels_yroom.consumer import YroomConsumer
 
     class TextCollaborationConsumer(YroomConsumer):
+        room_name_prefix: str = "yroom"
+        room_url_kwargs: str = "room_name"
+
+        # or
+
         def get_room_group_name(self) -> str:
             """
             Determine a unique name for this room, e.g. based on URL
@@ -24,6 +29,17 @@
             room_name = self.scope["url_route"]["kwargs"]["room_name"]
             return "textcollab_%s" % room_name
 
+
+        # use hooks or override the default
+
+        # hook:
+
+        async def pre_connect(self) -> None:
+            user = self.scope["user"]
+            if not user.is_staff:
+                await self.close()
+
+        # override the default
         async def connect(self) -> None:
             """
             Optional: perform some sort of authentication
@@ -113,4 +129,32 @@ sequenceDiagram
         Yroom Worker->>WebsocketConsumerB: broadcast update
         WebsocketConsumerB->>Bob: forward update
     end
+```
+
+
+### Consumer Hooks
+
+These hooks are called at the times described (pre and post) when the consumer events of the channel library are executed.
+
+```py
+class TextCollaborationConsumer(YroomConsumer):
+    async def pre_connect(self):
+        pass
+
+    async def post_connect(self):
+        pass
+
+    async def pre_disconnect(self):
+        pass
+
+    async def post_disconnect(self):
+        pass
+
+    async def pre_receive(self, text_data: Optional[str] = None, bytes_data: Optional[bytes] = None
+    ) -> None:
+        pass
+
+    async def post_receive(self, text_data: Optional[str] = None, bytes_data: Optional[bytes] = None
+    ) -> None:
+        pass
 ```
