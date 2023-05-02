@@ -137,7 +137,7 @@ sequenceDiagram
 These hooks are called at the times described (pre and post) when the consumer events of the channel library are executed.
 
 ```py
-class YRoomConsumerHooks:
+class TextCollaborationConsumer(YroomConsumer):
     async def pre_connect(self):
         pass
 
