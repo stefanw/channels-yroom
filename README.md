@@ -130,3 +130,31 @@ sequenceDiagram
         WebsocketConsumerB->>Bob: forward update
     end
 ```
+
+
+### Consumer Hooks
+
+These hooks are called at the times described (pre and post) when the consumer events of the channel library are executed.
+
+```py
+class YRoomConsumerHooks:
+    async def pre_connect(self):
+        pass
+
+    async def post_connect(self):
+        pass
+
+    async def pre_disconnect(self):
+        pass
+
+    async def post_disconnect(self):
+        pass
+
+    async def pre_receive(self, text_data: Optional[str] = None, bytes_data: Optional[bytes] = None
+    ) -> None:
+        pass
+
+    async def post_receive(self, text_data: Optional[str] = None, bytes_data: Optional[bytes] = None
+    ) -> None:
+        pass
+```
