@@ -17,6 +17,11 @@
     from channels_yroom.consumer import YroomConsumer
 
     class TextCollaborationConsumer(YroomConsumer):
+        room_name_prefix: str = "yroom"
+        room_url_kwargs: str = "room_name"
+
+        # or
+
         def get_room_group_name(self) -> str:
             """
             Determine a unique name for this room, e.g. based on URL
