@@ -4,7 +4,7 @@ from typing import Optional
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-from .conf import settings
+from .conf import get_room_settings
 from .utils import (
     YroomChannelMessage,
     YroomChannelMessageType,
@@ -17,12 +17,27 @@ logger = logging.getLogger(__name__)
 
 class YroomConsumer(AsyncWebsocketConsumer):
     def get_room_group_name(self) -> str:
+        """Returns the name of the room group to join.
+            This represents the room that the client is joining.
+
+        Returns:
+            str: room group name
+        """
         return "yroom_default"
 
     def get_connection_id(self) -> int:
         return random.getrandbits(64)
 
     async def connect(self) -> None:
+        """
+        Called when the websocket is handshaking as part of initial connection.
+        Override and perform authentication here (see
+        [Channels documentation on AsyncWebsocketConsumer](https://channels.readthedocs.io/en/stable/topics/consumers.html#asyncwebsocketconsumer)).
+
+        Call either `await self.join_room()` to accept the connection (default implementation)
+        or `await self.close()` to reject.
+
+        """
         await self.join_room()
 
     async def join_room(self) -> None:
@@ -35,8 +50,9 @@ class YroomConsumer(AsyncWebsocketConsumer):
         conn_group_name = get_connection_group_name(self.conn_id)
         await self.channel_layer.group_add(conn_group_name, self.channel_name)
         await self.accept()
+        self.room_settings = get_room_settings(self.room_group_name)
         await self.channel_layer.send(
-            settings.YROOM_CHANNEL_NAME,
+            self.room_settings["CHANNEL_NAME"],
             YroomChannelMessage(
                 type=YroomChannelMessageType.connect.value,
                 room=self.room_group_name,
@@ -55,7 +71,7 @@ class YroomConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(conn_group_name, self.channel_name)
         # Tell yroom worker that client disconnected
         await self.channel_layer.send(
-            settings.YROOM_CHANNEL_NAME,
+            self.room_settings["CHANNEL_NAME"],
             YroomChannelMessage(
                 type=YroomChannelMessageType.disconnect.value,
                 room=self.room_group_name,
@@ -72,7 +88,7 @@ class YroomConsumer(AsyncWebsocketConsumer):
 
     async def handle_room_message(self, bytes_data: bytes) -> None:
         await self.channel_layer.send(
-            settings.YROOM_CHANNEL_NAME,
+            self.room_settings["CHANNEL_NAME"],
             YroomChannelMessage(
                 type=YroomChannelMessageType.message.value,
                 room=self.room_group_name,

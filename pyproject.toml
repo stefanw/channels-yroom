@@ -25,8 +25,7 @@ classifiers = [
 dependencies = [
   "Django >= 3.2",
   "channels >= 4.0",
-  "yroom >= 0.0.3",
-  "django-appconf",
+  "yroom >= 0.0.5",
 ]
 dynamic = ["version"]
 

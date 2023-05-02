@@ -53,7 +53,7 @@ class YroomWorker:
         )
         # The consumer is also listening on a channel layer
         # but only on a new random channel
-        # so we listen on the yroom channel and forward messages
+        # so we listen on the given channel and forward messages
         while True:
             message = await self.channel_layer.receive(self.channel)
             if not message.get("type", None):

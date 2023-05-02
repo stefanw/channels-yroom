@@ -3,7 +3,7 @@ from typing import Optional, Protocol
 from asgiref.sync import sync_to_async
 from django.utils.module_loading import import_string
 
-from .conf import settings
+from .conf import get_room_settings
 from .models import YDocUpdate
 
 
@@ -52,5 +52,6 @@ class YDocDatabaseStorage(YDocStorage):
         return await save_db_snapshot(name, data)
 
 
-def get_ydoc_storage() -> YDocStorage:
-    return import_string(settings.YROOM_STORAGE_BACKEND)()
+def get_ydoc_storage(room_name) -> YDocStorage:
+    room_settings = get_room_settings(room_name)
+    return import_string(room_settings["STORAGE_BACKEND"])()

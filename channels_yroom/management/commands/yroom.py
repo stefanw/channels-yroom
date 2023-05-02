@@ -5,7 +5,7 @@ from channels.layers import get_channel_layer
 from channels.routing import get_default_application
 from django.core.management import BaseCommand, CommandError
 
-from ...conf import settings
+from ...conf import get_default_room_settings
 from ...worker import YroomWorker
 
 logger = logging.getLogger("django.channels.worker")
@@ -24,6 +24,13 @@ class Command(BaseCommand):
             default=DEFAULT_CHANNEL_LAYER,
             help="Channel layer alias to use, if not the default.",
         )
+        parser.add_argument(
+            "--channel",
+            action="store",
+            dest="channel",
+            default=None,
+            help="Channel layer alias to use, if not the default.",
+        )
 
     def handle(self, *args, **options):
         # Get the backend to use
@@ -35,11 +42,15 @@ class Command(BaseCommand):
             self.channel_layer = get_channel_layer()
         if self.channel_layer is None:
             raise CommandError("You do not have any CHANNEL_LAYERS configured.")
+        if "channel" in options:
+            channel = options["channel"]
+        else:
+            channel = get_default_room_settings()["CHANNEL_NAME"]
         # Run the worker
-        logger.info("Running worker for yroom channel")
+        logger.info("Running worker for channel '{}'", channel)
         worker = self.worker_class(
             application=get_default_application(),
-            channel=settings.YROOM_CHANNEL_NAME,
+            channel=channel,
             channel_layer=self.channel_layer,
         )
         worker.run()

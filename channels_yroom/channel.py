@@ -6,7 +6,7 @@ from typing import Optional
 from channels.consumer import AsyncConsumer
 from yroom import YRoomManager, YRoomMessage
 
-from .conf import settings
+from .conf import get_room_prefix, get_room_settings, get_settings
 from .storage import YDocStorage, get_ydoc_storage
 from .utils import (
     YroomChannelMessage,
@@ -19,9 +19,17 @@ logger = logging.getLogger(__name__)
 
 class YRoomChannelConsumer(AsyncConsumer):
     def __init__(self) -> None:
-        self.room_manager: YRoomManager = YRoomManager()
-        self.storage: YDocStorage = get_ydoc_storage()
+        self.room_manager: YRoomManager = YRoomManager(get_settings())
         self.cleanup_tasks = {}
+        self.storages: dict[str, YDocStorage] = {}
+
+    def get_storage(self, room_name):
+        prefix = get_room_prefix(room_name)
+        if prefix in self.storages:
+            return self.storages[prefix]
+        storage = get_ydoc_storage(room_name)
+        self.storages[prefix] = storage
+        return storage
 
     async def connect(self, message: YroomChannelMessage) -> None:
         room_name = message["room"]
@@ -36,7 +44,9 @@ class YRoomChannelConsumer(AsyncConsumer):
         if not self.room_manager.has_room(room_name):
             result = await self.create_room_from_snapshot(room_name, conn_id)
         if result is None:
-            logger.debug("yroom connect, room present %s %s", room_name, conn_id)
+            logger.debug(
+                "yroom connect, room present or no snapshot %s %s", room_name, conn_id
+            )
             result = self.room_manager.connect(room_name, conn_id)
         await self.respond(conn_id, room_name, result)
 
@@ -44,7 +54,10 @@ class YRoomChannelConsumer(AsyncConsumer):
         self, room_name: str, conn_id: int = 0
     ) -> Optional[YRoomMessage]:
         logger.debug("yroom connect, no room yet %s %s", room_name, conn_id)
-        snapshot = await self.storage.get_snapshot(room_name)
+        storage = self.get_storage(room_name)
+        logger.debug("Using yroom storage %s of %s", storage, self.storages)
+        snapshot = await storage.get_snapshot(room_name)
+        logger.debug("Found snapshot %s", snapshot)
         if snapshot:
             logger.debug("yroom connect, snapshot found %s %s", room_name, snapshot)
             return self.room_manager.connect_with_data(room_name, conn_id, snapshot)
@@ -52,7 +65,7 @@ class YRoomChannelConsumer(AsyncConsumer):
     async def message(self, message: YroomChannelMessage) -> None:
         room_name = message["room"]
         conn_id = message["conn_id"]
-        # logger.debug("yroom consumer message %s %s", room_name, conn_id)
+        logger.debug("yroom consumer message %s %s: %s", room_name, conn_id, message)
         result = self.room_manager.handle_message(
             room_name, conn_id, message["payload"]
         )
@@ -105,13 +118,13 @@ class YRoomChannelConsumer(AsyncConsumer):
         )
 
     async def respond(self, conn_id: int, room_name: str, result: YRoomMessage) -> None:
-        # logger.debug(
-        #     "yroom response in room %s at conection %s (client: %s, broadcast: %s)",
-        #     room_name,
-        #     conn_id,
-        #     bool(result.payload),
-        #     bool(result.broadcast_payload),
-        # )
+        logger.debug(
+            "yroom response in room %s at conection %s (client: %s, broadcast: %s)",
+            room_name,
+            conn_id,
+            result.payload,
+            result.broadcast_payload,
+        )
         if result.payload:
             conn_group_name = get_connection_group_name(conn_id)
             await self.send_response(conn_group_name, result.payload)
@@ -151,7 +164,8 @@ class YRoomChannelConsumer(AsyncConsumer):
 
     async def remove_room_soon(self, room_name: str):
         # Wait a bit and then check if the room is still alive
-        await asyncio.sleep(settings.YROOM_REMOVE_ROOM_DELAY)
+        room_settings = get_room_settings(room_name)
+        await asyncio.sleep(room_settings["REMOVE_ROOM_DELAY"])
         await self.remove_room(room_name)
 
     async def remove_room(self, room_name: str):
@@ -174,7 +188,8 @@ class YRoomChannelConsumer(AsyncConsumer):
         if ydoc_bytes is None:
             # Room is gone!
             return
-        await self.storage.save_snapshot(room_name, ydoc_bytes)
+        storage = self.get_storage(room_name)
+        await storage.save_snapshot(room_name, ydoc_bytes)
 
     async def shutdown(self, message) -> None:
         logger.info("Shutdown event received")

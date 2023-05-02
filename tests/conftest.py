@@ -14,6 +14,10 @@ def pytest_configure():
         ],
         SECRET_KEY="Not_a_secret_key",
         CHANNEL_LAYERS={"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}},
-        YROOM_STORAGE_BACKEND="channels_yroom.storage.YDocDummyStorage",
-        YROOM_REMOVE_ROOM_DELAY=0,
+        YROOM_SETTINGS={
+            "default": {
+                "STORAGE_BACKEND": "channels_yroom.storage.YDocDummyStorage",
+                "REMOVE_ROOM_DELAY": 0,
+            }
+        },
     )
