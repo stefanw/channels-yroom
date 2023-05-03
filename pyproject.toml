@@ -60,16 +60,13 @@ skip-install = true
 detached = true
 dependencies = [
   "black",
-  "isort",
-  "flake8",
-  "Flake8-pyproject",
+  "ruff",
 ]
 
 [tool.hatch.envs.lint.scripts]
 check = [
-  "flake8 channels_yroom tests",
+  "ruff channels_yroom tests",
   "black --check --diff channels_yroom tests",
-  "isort --check-only --diff channels_yroom tests",
 ]
 
 [project.urls]

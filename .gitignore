@@ -8,3 +8,4 @@ node_modules/
 dist/
 db.sqlite3
 build/
+.ruff_cache
