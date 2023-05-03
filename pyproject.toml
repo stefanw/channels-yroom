@@ -40,8 +40,19 @@ dependencies = [
 ]
 
 [tool.hatch.envs.docs]
+skip-install = true
+detached = true
 dependencies = [
   "mkdocs",
+  "mkdocstrings[python]",
+  "mkdocs-mermaid2-plugin",
+]
+[tool.hatch.envs.docs.scripts]
+serve = [
+  "mkdocs serve -a 127.0.0.1:8001",
+]
+freeze = [
+  "pip freeze > docs/requirements.txt",
 ]
 
 [tool.hatch.envs.lint]

@@ -18,7 +18,8 @@ plugins:
 nav:
   - "Channels-Yroom": 'index.md'
   - "Getting started": 'tutorial.md'
-  - "How-To": 'howto.md'
+  - 'How To':
+      - 'Use TipTap Hocuspocus provider': 'howto/tiptap.md'
   - "Settings": 'settings.md'
   - "API Reference": 'api.md'
   - "Explanation": 'explanation.md'
