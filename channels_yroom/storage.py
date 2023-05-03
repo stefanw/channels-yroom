@@ -52,6 +52,14 @@ class YDocDatabaseStorage(YDocStorage):
         return await save_db_snapshot(name, data)
 
 
+storage_cache = {}
+
+
 def get_ydoc_storage(room_name) -> YDocStorage:
     room_settings = get_room_settings(room_name)
-    return import_string(room_settings["STORAGE_BACKEND"])()
+    backend = room_settings["STORAGE_BACKEND"]
+    if backend in storage_cache:
+        return storage_cache[backend]
+    storage = import_string(backend)()
+    storage_cache[backend] = storage
+    return storage
