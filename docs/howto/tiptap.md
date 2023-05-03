@@ -42,15 +42,15 @@ Your `consumers.py` could look like this:
 from channels_yroom.consumer import YroomConsumer
 
 
-def get_room_group_name(room_name: str) -> str:
+def get_room_name(room_name: str) -> str:
     # The room prefix is 'tiptap-editor'
     return "tiptap-editor.%s" % room_name
 
 
 class TextEditorCollabConsumer(YroomConsumer):
-    def get_room_group_name(self) -> str:
+    def get_room_name(self) -> str:
         room_name = str(self.scope["url_route"]["kwargs"]["pk"])
-        return get_room_group_name(room_name)
+        return get_room_name(room_name)
 ```
 
 Your `settings.py` should contain the following:

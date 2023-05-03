@@ -16,14 +16,16 @@ logger = logging.getLogger(__name__)
 
 
 class YroomConsumer(AsyncWebsocketConsumer):
-    def get_room_group_name(self) -> str:
+    room_name = "yroom_default"
+
+    def get_room_name(self) -> str:
         """Returns the name of the room group to join.
             This represents the room that the client is joining.
 
         Returns:
             str: room group name
         """
-        return "yroom_default"
+        return self.room_name
 
     def get_connection_id(self) -> int:
         return random.getrandbits(64)
@@ -37,25 +39,25 @@ class YroomConsumer(AsyncWebsocketConsumer):
         Call either `await self.join_room()` to accept the connection (default implementation)
         or `await self.close()` to reject.
 
-        """
+        """  # noqa: E501
         await self.join_room()
 
     async def join_room(self) -> None:
         # Join room group
-        self.room_group_name = self.get_room_group_name()
+        self.room_name = self.get_room_name()
         self.conn_id = self.get_connection_id()
 
-        logger.debug("joining room %s as %s", self.room_group_name, self.conn_id)
-        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+        logger.debug("joining room %s as %s", self.room_name, self.conn_id)
+        await self.channel_layer.group_add(self.room_name, self.channel_name)
         conn_group_name = get_connection_group_name(self.conn_id)
         await self.channel_layer.group_add(conn_group_name, self.channel_name)
         await self.accept()
-        self.room_settings = get_room_settings(self.room_group_name)
+        self.room_settings = get_room_settings(self.room_name)
         await self.channel_layer.send(
             self.room_settings["CHANNEL_NAME"],
             YroomChannelMessage(
                 type=YroomChannelMessageType.connect.value,
-                room=self.room_group_name,
+                room=self.room_name,
                 conn_id=self.conn_id,
             ),
         )
@@ -65,8 +67,8 @@ class YroomConsumer(AsyncWebsocketConsumer):
 
     async def leave_room(self) -> None:
         # Leave room group
-        logger.debug("leaving room %s as %s", self.room_group_name, self.conn_id)
-        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+        logger.debug("leaving room %s as %s", self.room_name, self.conn_id)
+        await self.channel_layer.group_discard(self.room_name, self.channel_name)
         conn_group_name = get_connection_group_name(self.conn_id)
         await self.channel_layer.group_discard(conn_group_name, self.channel_name)
         # Tell yroom worker that client disconnected
@@ -74,7 +76,7 @@ class YroomConsumer(AsyncWebsocketConsumer):
             self.room_settings["CHANNEL_NAME"],
             YroomChannelMessage(
                 type=YroomChannelMessageType.disconnect.value,
-                room=self.room_group_name,
+                room=self.room_name,
                 conn_id=self.conn_id,
             ),
         )
@@ -91,7 +93,7 @@ class YroomConsumer(AsyncWebsocketConsumer):
             self.room_settings["CHANNEL_NAME"],
             YroomChannelMessage(
                 type=YroomChannelMessageType.message.value,
-                room=self.room_group_name,
+                room=self.room_name,
                 conn_id=self.conn_id,
                 payload=bytes_data,
             ),
