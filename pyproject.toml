@@ -29,6 +29,17 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[project.urls]
+Documentation = "https://github.com/stefanw/channels-yroom#readme"
+Issues = "https://github.com/stefanw/channels-yroom/issues"
+Source = "https://github.com/stefanw/channels-yroom"
+
+[tool.hatch.version]
+path = "channels_yroom/__about__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["channels_yroom"]
+
 [tool.hatch.envs.test]
 dependencies = [
   "async-timeout",
@@ -37,7 +48,15 @@ dependencies = [
   "pytest-cov",
   "pytest-django",
   "pytest",
+  "y-py",
 ]
+
+[tool.hatch.envs.test.scripts]
+test = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=channels_yroom --cov=tests {args}"
+no-cov = "test --no-cov {args}"
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11"]
 
 [tool.hatch.envs.docs]
 skip-install = true
@@ -69,24 +88,6 @@ check = [
   "black --check --diff channels_yroom tests",
 ]
 
-[project.urls]
-Documentation = "https://github.com/stefanw/channels-yroom#readme"
-Issues = "https://github.com/stefanw/channels-yroom/issues"
-Source = "https://github.com/stefanw/channels-yroom"
-
-[tool.hatch.version]
-path = "channels_yroom/__about__.py"
-
-[tool.hatch.build.targets.wheel]
-packages = ["channels_yroom"]
-
-[tool.hatch.envs.test.scripts]
-test = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=channels_yroom --cov=tests {args}"
-no-cov = "test --no-cov {args}"
-
-[[tool.hatch.envs.test.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11"]
-
 [tool.coverage.run]
 branch = true
 parallel = true
@@ -100,10 +101,3 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
-
-[tool.flake8]
-extend-ignore = ['E203']
-max-line-length = 88
-
-[tool.isort]
-profile = 'black'
