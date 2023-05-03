@@ -33,6 +33,8 @@ class YroomDocument:
         self.room_name = room_name
         if channel_layer is None:
             self.channel_layer = get_channel_layer()
+        else:
+            self.channel_layer = channel_layer
 
     async def export_map(self, name: str) -> Dict[str, Any]:
         """Get an export of a Ymap as a Python dictionary.
