@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django.http import HttpResponse
 from django.shortcuts import render
 
@@ -21,7 +23,7 @@ async def save_room(request, room_name):
     # Get the XML fragment from the server ydoc
     room_group_name = get_room_group_name(room_name)
     doc = YroomDocument(room_group_name)
-    result = await doc.get_xml_fragment(YDOC_XML_FRAGMENT_KEY)
+    result: Optional[str] = await doc.export_xml_fragment(YDOC_XML_FRAGMENT_KEY)
     if result is None:
         return HttpResponse(status=404)
     return HttpResponse(result)
