@@ -36,7 +36,7 @@ class YroomDocument:
 
     async def export_map(self, name: str) -> Dict[str, Any]:
         """Get an export of a Ymap as a Python dictionary.
-        Raises DataUnavailable if the map is not present in the Ydoc
+        Raises `DataUnavailable` if the map is not present in the Ydoc
             or the room is not present and cannot be restored from storage.
 
         Args:
@@ -48,18 +48,68 @@ class YroomDocument:
         return await self._export_type_json("get_map", name)
 
     async def export_array(self, name: str) -> List[Any]:
+        """Get an export of a Yarray as a Python list.
+        Raises `DataUnavailable` if the array is not present in the Ydoc
+            or the room is not present and cannot be restored from storage.
+
+        Args:
+            name (str): name of the array
+
+        Returns:
+            List[Any]: A list representing the exported map
+        """
         return await self._export_type_json("get_array", name)
 
     async def export_xml_fragment(self, name: str) -> str:
+        """Get an export of a YXmlFragment as a str.
+        Raises `DataUnavailable` if the XML fragment is not present in the Ydoc
+            or the room is not present and cannot be restored from storage.
+
+        Args:
+            name (str): name of the xml fragment
+
+        Returns:
+            str: A string serialization of the XML fragment
+        """
         return await self._export_type("get_xml_fragment", name)
 
     async def export_text(self, name: str) -> str:
+        """Get an export of a Ytext as a str.
+        Raises `DataUnavailable` if the text is not present in the Ydoc
+            or the room is not present and cannot be restored from storage.
+
+        Args:
+            name (str): name of the xml text
+
+        Returns:
+            str: A string serialization of the XML fragment
+        """
         return await self._export_type("get_text", name)
 
     async def export_xml_element(self, name: str) -> str:
+        """Get an export of a YXmlElement as a str.
+        Raises `DataUnavailable` if the XML element is not present in the Ydoc
+            or the room is not present and cannot be restored from storage.
+
+        Args:
+            name (str): name of the xml element
+
+        Returns:
+            str: A string serialization of the XML element
+        """
         return await self._export_type("get_xml_element", name)
 
     async def export_xml_text(self, name: str) -> str:
+        """Get an export of a YXmlText as a str.
+        Raises `DataUnavailable` if the XML text is not present in the Ydoc
+            or the room is not present and cannot be restored from storage.
+
+        Args:
+            name (str): name of the xml text
+
+        Returns:
+            str: A string serialization of the XML text
+        """
         return await self._export_type("get_xml_text", name)
 
     async def _export_type_json(self, method: str, name: str) -> Any:
