@@ -7,6 +7,8 @@ Room names can have a prefix that is separated by a dot character (`"."`), e.g. 
 This allows different settings for different room types distinguished via their prefix:
 
 ```python
+# In your Django settings.py
+
 YROOM_SETTINGS = {
     # Change default room removal delay to 60 seconds
     "default": {
@@ -14,10 +16,10 @@ YROOM_SETTINGS = {
         # Other values are taken from defaults
     },
     # Rooms with the "textcollab" prefix should stay around even longer
+    # Applies to room names like "textcollab.1"
     "textcollab": {
         "REMOVE_ROOM_DELAY": 120,  # in seconds
     }
-    # Applies to room names like "textcollab.1"
 }
 ```
 

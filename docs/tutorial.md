@@ -1,10 +1,10 @@
-# Tutorial
+# Getting started
 
 ## Adding real-time collaboration to your Django project
 
 This tutorial assumes that you have tried out the [Channels tutorial](https://channels.readthedocs.io/en/stable/tutorial/index.html) (at least part 1 and 3).
 
-### Install:
+### Install
 
 ```
 pip install channels-yroom
@@ -12,7 +12,7 @@ pip install channels-yroom
 
 ### Add apps to settings
 
-Add `channels` and `channels_yroom` to `INSTALLED_APPS` in your settings.
+Add `"channels"` and `"channels_yroom"` to `INSTALLED_APPS` in your settings.
 
 ### Setup consumer
 
