@@ -45,7 +45,7 @@ class YroomDocument:
         Returns:
             Dict[str, Any]: A dictionary representing the exported map
         """
-        return await self._export_type_json("get_map", name)
+        return await self._export_type_json("export_map", name)
 
     async def export_array(self, name: str) -> List[Any]:
         """Get an export of a Yarray as a Python list.
@@ -58,7 +58,7 @@ class YroomDocument:
         Returns:
             List[Any]: A list representing the exported map
         """
-        return await self._export_type_json("get_array", name)
+        return await self._export_type_json("export_array", name)
 
     async def export_xml_fragment(self, name: str) -> str:
         """Get an export of a YXmlFragment as a str.
@@ -71,7 +71,7 @@ class YroomDocument:
         Returns:
             str: A string serialization of the XML fragment
         """
-        return await self._export_type("get_xml_fragment", name)
+        return await self._export_type("export_xml_fragment", name)
 
     async def export_text(self, name: str) -> str:
         """Get an export of a Ytext as a str.
@@ -84,7 +84,7 @@ class YroomDocument:
         Returns:
             str: A string serialization of the XML fragment
         """
-        return await self._export_type("get_text", name)
+        return await self._export_type("export_text", name)
 
     async def export_xml_element(self, name: str) -> str:
         """Get an export of a YXmlElement as a str.
@@ -97,7 +97,7 @@ class YroomDocument:
         Returns:
             str: A string serialization of the XML element
         """
-        return await self._export_type("get_xml_element", name)
+        return await self._export_type("export_xml_element", name)
 
     async def export_xml_text(self, name: str) -> str:
         """Get an export of a YXmlText as a str.
@@ -110,7 +110,7 @@ class YroomDocument:
         Returns:
             str: A string serialization of the XML text
         """
-        return await self._export_type("get_xml_text", name)
+        return await self._export_type("export_xml_text", name)
 
     async def _export_type_json(self, method: str, name: str) -> Any:
         data = await self._export_type(method, name)
