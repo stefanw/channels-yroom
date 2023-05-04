@@ -8,6 +8,17 @@
 
 [Read the documentation](https://channels-yroom.readthedocs.io/en/latest/)
 
+## Showcase: text collaboration example
+
+The `example` folder contains a simple project that uses `y-prosemirror` to allow for realtime collaboration on rich text.
+
+Run the included Docker compose file to check it out:
+
+```sh
+docker compose up
+# Then visit localhost:8000
+```
+
 ## License
 
 MIT
