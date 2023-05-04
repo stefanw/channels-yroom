@@ -1,20 +1,28 @@
 import asyncio
 from collections import deque
 from contextlib import asynccontextmanager
+from io import StringIO
 
 import pytest
 import pytest_asyncio
 import y_py as Y
 from asgiref.testing import ApplicationCommunicator
 from channels.layers import get_channel_layer
+from channels.routing import ChannelNameRouter, ProtocolTypeRouter
 from channels.testing import WebsocketCommunicator
+from django.core.management import call_command
 
 from channels_yroom.channel import YRoomChannelConsumer
-from channels_yroom.conf import get_room_settings
+from channels_yroom.conf import get_default_room_settings, get_room_settings
 from channels_yroom.consumer import YroomConsumer
-from channels_yroom.models import YDocUpdate
+from channels_yroom.management.commands.yroom import Command as YroomCommand
 from channels_yroom.proxy import DataUnavailable, YroomDocument
 from channels_yroom.storage import get_ydoc_storage
+from channels_yroom.worker import YroomWorker
+
+SYNC_STEP_1_DATA = b"\x00\x00\x07\x01\xe9\xdb\x9a\x90\x01\x06"
+# state as update of a doc {"test": "hello"}
+DOC_DATA = b"\x01\x01\xe9\xdb\x9a\x90\x01\x00\x04\x01\x04test\x06hello \x00"
 
 
 class FakeWorker:
@@ -191,6 +199,8 @@ async def test_yroom_consumer():
 @pytest.mark.asyncio
 @pytest.mark.django_db
 async def test_snapshot_yroom_consumer(settings):
+    from channels_yroom.models import YDocUpdate
+
     settings.YROOM_SETTINGS = {
         "default": {
             "STORAGE_BACKEND": "channels_yroom.storage.YDocDatabaseStorage",
@@ -210,8 +220,6 @@ async def test_snapshot_yroom_consumer(settings):
 
     SYNC_STEP_1 = b"\x00\x00\x07\x01\xe9\xdb\x9a\x90\x01\x06"
     SYNC_STEP_2 = b"\x00\x01\x02\x00\x00"
-    # state as update of a doc {"test": "hello"}
-    DOC_DATA = b"\x01\x01\xe9\xdb\x9a\x90\x01\x00\x04\x01\x04test\x06hello \x00"
 
     app = TestConsumer()
     room_name = app.get_room_name()
@@ -333,3 +341,79 @@ async def test_export_bad_room(yroom_worker):
         await proxy.export_map("map")
     with pytest.raises(DataUnavailable):
         await proxy.export_xml_element("xml_element")
+
+
+def test_yroom_command(monkeypatch):
+    class FakeWorker:
+        def __init__(self, channel, channel_layer):
+            self.channel = channel
+            self.channel_layer = channel_layer
+
+        def run(self):
+            pass
+
+    monkeypatch.setattr(YroomCommand, "worker_class", FakeWorker)
+    out = StringIO()
+    call_command(
+        "yroom",
+        stdout=out,
+        stderr=StringIO(),
+    )
+    assert "Running worker for channel 'yroom'\n" == out.getvalue()
+
+    out = StringIO()
+    call_command(
+        "yroom",
+        "--channel",
+        "foobar",
+        stdout=out,
+        stderr=StringIO(),
+    )
+    assert "Running worker for channel 'foobar'\n" == out.getvalue()
+
+
+@pytest.mark.asyncio
+async def test_yroom_worker(settings):
+    settings.YROOM_SETTINGS = {
+        "default": {
+            "STORAGE_BACKEND": "channels_yroom.storage.YDocMemoryStorage",
+            "REMOVE_ROOM_DELAY": 0,
+        }
+    }
+
+    channel_layer = get_channel_layer()
+    channel = get_default_room_settings()["CHANNEL_NAME"]
+
+    application = ProtocolTypeRouter(
+        {
+            "channel": ChannelNameRouter(
+                {
+                    "yroom": YRoomChannelConsumer.as_asgi(),
+                }
+            ),
+        }
+    )
+
+    worker = YroomWorker(
+        channel=channel, channel_layer=channel_layer, application=application
+    )
+    worker_task = asyncio.create_task(worker.run_worker())
+
+    app = YroomConsumer()
+    room_name = app.get_room_name()
+
+    storage = get_ydoc_storage(room_name)
+    await storage.save_snapshot(room_name, DOC_DATA)
+
+    client_1 = WebsocketCommunicator(app, "/testws/")
+    connected, _ = await client_1.connect()
+    assert connected
+
+    payload = await client_1.receive_from()
+    assert payload == SYNC_STEP_1_DATA
+
+    worker_task.cancel()
+    try:
+        await worker_task
+    except asyncio.exceptions.CancelledError:
+        pass
