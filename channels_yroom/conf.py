@@ -33,9 +33,10 @@ def get_room_prefix(room_name):
 
 def find_room_settings(room_name):
     prefix = get_room_prefix(room_name)
-    if prefix in settings.YROOM_SETTINGS:
-        return settings.YROOM_SETTINGS[prefix]
+    yroom_settings = get_settings()
+    if prefix in yroom_settings:
+        return yroom_settings[prefix]
     try:
-        return settings.YROOM_SETTINGS[DEFAULT_ROOM]
+        return yroom_settings[DEFAULT_ROOM]
     except KeyError:
         raise ImproperlyConfigured("YROOM_SETTINGS must contain a 'default' key.")
