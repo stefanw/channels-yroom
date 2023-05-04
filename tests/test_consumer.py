@@ -16,6 +16,7 @@ from channels_yroom.channel import YRoomChannelConsumer
 from channels_yroom.conf import get_default_room_settings, get_room_settings
 from channels_yroom.consumer import YroomConsumer
 from channels_yroom.management.commands.yroom import Command as YroomCommand
+from channels_yroom.models import YDocUpdate
 from channels_yroom.proxy import DataUnavailable, YroomDocument
 from channels_yroom.storage import get_ydoc_storage
 from channels_yroom.worker import YroomWorker
@@ -199,8 +200,6 @@ async def test_yroom_consumer():
 @pytest.mark.asyncio
 @pytest.mark.django_db
 async def test_snapshot_yroom_consumer(settings):
-    from channels_yroom.models import YDocUpdate
-
     settings.YROOM_SETTINGS = {
         "default": {
             "STORAGE_BACKEND": "channels_yroom.storage.YDocDatabaseStorage",
@@ -268,8 +267,6 @@ async def test_snapshot_yroom_consumer(settings):
         assert worker_results["shutdown"]
 
         ydoc_update = await YDocUpdate.objects.aget(name=room_name)
-        assert ydoc_update.timestamp > timestamp
-        assert ydoc_update.timestamp > timestamp
         assert ydoc_update.timestamp > timestamp
 
 
@@ -373,10 +370,11 @@ def test_yroom_command(monkeypatch):
 
 
 @pytest.mark.asyncio
+@pytest.mark.django_db
 async def test_yroom_worker(settings):
     settings.YROOM_SETTINGS = {
         "default": {
-            "STORAGE_BACKEND": "channels_yroom.storage.YDocMemoryStorage",
+            "STORAGE_BACKEND": "channels_yroom.storage.YDocDatabaseStorage",
             "REMOVE_ROOM_DELAY": 0,
         }
     }
@@ -394,9 +392,31 @@ async def test_yroom_worker(settings):
         }
     )
 
+    loop_state = {}
+
+    class FakeSignal:
+        name = "FakeSignal"
+
+    class FakeLoop:
+        removed_signals = set()
+        added_signals = set()
+
+        def add_signal_handler(self, sig, callback):
+            self.added_signals.add(sig)
+
+        def remove_signal_handler(self, sig):
+            self.removed_signals.add(sig)
+
+        def stop(self):
+            loop_state["stopped"] = True
+
+    fake_loop = FakeLoop()
+
     worker = YroomWorker(
         channel=channel, channel_layer=channel_layer, application=application
     )
+    worker._setup_signal_handlers(fake_loop)
+    assert fake_loop.added_signals == set(worker.SIGNALS)
     worker_task = asyncio.create_task(worker.run_worker())
 
     app = YroomConsumer()
@@ -404,6 +424,8 @@ async def test_yroom_worker(settings):
 
     storage = get_ydoc_storage(room_name)
     await storage.save_snapshot(room_name, DOC_DATA)
+    ydoc_update = await YDocUpdate.objects.aget(name=room_name)
+    timestamp_before = ydoc_update.timestamp
 
     client_1 = WebsocketCommunicator(app, "/testws/")
     connected, _ = await client_1.connect()
@@ -411,6 +433,13 @@ async def test_yroom_worker(settings):
 
     payload = await client_1.receive_from()
     assert payload == SYNC_STEP_1_DATA
+
+    await worker.shutdown_worker(FakeSignal, FakeLoop())
+    assert loop_state["stopped"]
+    assert fake_loop.removed_signals == set(worker.SIGNALS)
+
+    ydoc_update = await YDocUpdate.objects.aget(name=room_name)
+    assert ydoc_update.timestamp > timestamp_before
 
     worker_task.cancel()
     try:
