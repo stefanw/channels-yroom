@@ -2,6 +2,8 @@ import asyncio
 import logging
 import signal
 
+from channels.routing import get_default_application
+
 logger = logging.getLogger(__name__)
 
 
@@ -12,10 +14,13 @@ class YroomWorker:
         signal.SIGINT,
     )
 
-    def __init__(self, application, channel, channel_layer):
-        self.application = application
+    def __init__(self, channel, channel_layer, application=None):
         self.channel = channel
         self.channel_layer = channel_layer
+        if application is None:
+            self.application = get_default_application()
+        else:
+            self.application = application
 
     def run(self):
         """

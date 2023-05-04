@@ -2,7 +2,6 @@ import logging
 
 from channels import DEFAULT_CHANNEL_LAYER
 from channels.layers import get_channel_layer
-from channels.routing import get_default_application
 from django.core.management import BaseCommand, CommandError
 
 from ...conf import get_default_room_settings
@@ -42,14 +41,14 @@ class Command(BaseCommand):
             self.channel_layer = get_channel_layer()
         if self.channel_layer is None:
             raise CommandError("You do not have any CHANNEL_LAYERS configured.")
+        channel = None
         if "channel" in options:
             channel = options["channel"]
-        else:
+        if channel is None:
             channel = get_default_room_settings()["CHANNEL_NAME"]
         # Run the worker
-        logger.info("Running worker for channel '{}'", channel)
+        self.stdout.write("Running worker for channel '%s'\n" % channel)
         worker = self.worker_class(
-            application=get_default_application(),
             channel=channel,
             channel_layer=self.channel_layer,
         )
