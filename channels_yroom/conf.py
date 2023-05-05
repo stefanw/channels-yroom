@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 
 DEFAULT_ROOM = "default"
 PREFIX_SEPARATOR = "."
@@ -39,4 +38,4 @@ def find_room_settings(room_name):
     try:
         return yroom_settings[DEFAULT_ROOM]
     except KeyError:
-        raise ImproperlyConfigured("YROOM_SETTINGS must contain a 'default' key.")
+        return DEFAULTS.copy()
