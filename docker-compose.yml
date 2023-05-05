@@ -6,11 +6,13 @@ x-app-defaults:
   init: true
   links:
     - broker
+    - db
   environment:
     - REDIS_HOST=broker
     - DJANGO_DEBUG=0
   depends_on:
     - broker
+    - db
 
 services:
   db:
