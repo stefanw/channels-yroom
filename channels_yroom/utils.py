@@ -4,7 +4,7 @@ from typing import Any, List, Optional, TypedDict
 
 class YroomChannelResponse(TypedDict):
     type: str
-    payload: bytes
+    payloads: List[bytes]
 
 
 class YroomChannelMessageType(str, Enum):
@@ -18,6 +18,7 @@ class _YroomChannelMessage(TypedDict):  # implicitly total=True
     type: YroomChannelMessageType
     room: str
     conn_id: int
+    channel_name: str
 
 
 class YroomChannelMessage(_YroomChannelMessage, total=False):

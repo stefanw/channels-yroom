@@ -49,8 +49,6 @@ class YroomConsumer(AsyncWebsocketConsumer):
 
         logger.debug("joining room %s as %s", self.room_name, self.conn_id)
         await self.channel_layer.group_add(self.room_name, self.channel_name)
-        conn_group_name = get_connection_group_name(self.conn_id)
-        await self.channel_layer.group_add(conn_group_name, self.channel_name)
         await self.accept()
         self.room_settings = get_room_settings(self.room_name)
         await self.channel_layer.send(
@@ -59,6 +57,7 @@ class YroomConsumer(AsyncWebsocketConsumer):
                 type=YroomChannelMessageType.connect.value,
                 room=self.room_name,
                 conn_id=self.conn_id,
+                channel_name=self.channel_name,
             ),
         )
 
@@ -69,8 +68,6 @@ class YroomConsumer(AsyncWebsocketConsumer):
         # Leave room group
         logger.debug("leaving room %s as %s", self.room_name, self.conn_id)
         await self.channel_layer.group_discard(self.room_name, self.channel_name)
-        conn_group_name = get_connection_group_name(self.conn_id)
-        await self.channel_layer.group_discard(conn_group_name, self.channel_name)
         # Tell yroom worker that client disconnected
         await self.channel_layer.send(
             self.room_settings["CHANNEL_NAME"],
@@ -78,6 +75,7 @@ class YroomConsumer(AsyncWebsocketConsumer):
                 type=YroomChannelMessageType.disconnect.value,
                 room=self.room_name,
                 conn_id=self.conn_id,
+                channel_name=self.channel_name,
             ),
         )
 
@@ -95,9 +93,11 @@ class YroomConsumer(AsyncWebsocketConsumer):
                 type=YroomChannelMessageType.message.value,
                 room=self.room_name,
                 conn_id=self.conn_id,
+                channel_name=self.channel_name,
                 payload=bytes_data,
             ),
         )
 
     async def forward_payload(self, message: YroomChannelResponse) -> None:
-        await self.send(bytes_data=message["payload"])
+        for payload in message["payloads"]:
+            await self.send(bytes_data=payload)

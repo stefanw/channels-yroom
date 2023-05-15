@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
-from typing import Optional
+from typing import List, Optional
 
 from channels.consumer import AsyncConsumer
 from yroom import YRoomManager, YRoomMessage
@@ -48,7 +48,9 @@ class YRoomChannelConsumer(AsyncConsumer):
                 "yroom connect, room present or no snapshot %s %s", room_name, conn_id
             )
             result = self.room_manager.connect(room_name, conn_id)
-        await self.respond(conn_id, room_name, result)
+        await self.respond(
+            result, room_name=room_name, channel_name=message["channel_name"]
+        )
 
     async def create_room_from_snapshot(
         self, room_name: str, conn_id: int = 0
@@ -65,6 +67,7 @@ class YRoomChannelConsumer(AsyncConsumer):
     async def message(self, message: YroomChannelMessage) -> None:
         room_name = message["room"]
         conn_id = message["conn_id"]
+        channel_name = message["channel_name"]
         logger.debug("yroom consumer message %s %s: %s", room_name, conn_id, message)
         # If room not present (and connect is lost/expired?), try restore first
         if not self.room_manager.has_room(room_name):
@@ -73,7 +76,7 @@ class YRoomChannelConsumer(AsyncConsumer):
         result = self.room_manager.handle_message(
             room_name, conn_id, message["payload"]
         )
-        await self.respond(conn_id, room_name, result)
+        await self.respond(result, room_name=room_name, channel_name=channel_name)
 
     @asynccontextmanager
     async def try_room(self, room_name: str) -> None:
@@ -121,25 +124,29 @@ class YRoomChannelConsumer(AsyncConsumer):
             },
         )
 
-    async def respond(self, conn_id: int, room_name: str, result: YRoomMessage) -> None:
+    async def respond(
+        self,
+        result: YRoomMessage,
+        room_name: str,
+        channel_name: Optional[str] = None,
+    ) -> None:
         logger.debug(
-            "yroom response in room %s at conection %s (client: %s, broadcast: %s)",
+            "yroom response in room %s at channel %s (client: %s, broadcast: %s)",
             room_name,
-            conn_id,
-            result.payload,
-            result.broadcast_payload,
+            channel_name,
+            result.payloads,
+            result.broadcast_payloads,
         )
-        if result.payload:
-            conn_group_name = get_connection_group_name(conn_id)
-            await self.send_response(conn_group_name, result.payload)
-        if result.broadcast_payload:
-            await self.send_response(room_name, result.broadcast_payload)
-
-    async def send_response(self, group_name: str, payload: bytes) -> None:
-        await self.channel_layer.group_send(
-            group_name,
-            {"type": "forward_payload", "payload": payload},
-        )
+        if result.payloads and channel_name:
+            await self.channel_layer.send(
+                channel_name,
+                {"type": "forward_payload", "payloads": result.payloads},
+            )
+        if result.broadcast_payloads:
+            await self.channel_layer.group_send(
+                room_name,
+                {"type": "forward_payload", "payloads": result.broadcast_payloads},
+            )
 
     async def disconnect(self, message: YroomChannelMessage) -> None:
         await self.disconnect_client(message["room"], conn_id=message["conn_id"])
@@ -156,7 +163,7 @@ class YRoomChannelConsumer(AsyncConsumer):
             logger.debug("Room %s is empty", room_name)
             await self.schedule_room_removal(room_name)
         if send_response:
-            await self.respond(conn_id, room_name, result)
+            await self.respond(result, room_name=room_name, channel_name=None)
 
     async def schedule_room_removal(self, room_name: str):
         if room_name in self.cleanup_tasks:
