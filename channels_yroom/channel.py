@@ -66,6 +66,10 @@ class YRoomChannelConsumer(AsyncConsumer):
         room_name = message["room"]
         conn_id = message["conn_id"]
         logger.debug("yroom consumer message %s %s: %s", room_name, conn_id, message)
+        # If room not present (and connect is lost/expired?), try restore first
+        if not self.room_manager.has_room(room_name):
+            # Ignore result, connect is kind of optional
+            await self.create_room_from_snapshot(room_name, conn_id)
         result = self.room_manager.handle_message(
             room_name, conn_id, message["payload"]
         )
