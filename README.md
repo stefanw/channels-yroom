@@ -19,6 +19,16 @@ docker compose up
 # Then visit localhost:8000
 ```
 
+## Development
+
+Project uses `hatch` for the development workflow:
+
+```
+pip install hatch
+
+hatch run +py=3.10 test:test
+```
+
 ## License
 
 MIT
