@@ -62,6 +62,27 @@ application = ProtocolTypeRouter(
 )
 ```
 
+### Use a channel layer for inter-process communication
+
+**Warning: The In-Memory Channel Layer will not work with `channels-yroom`!**
+
+Because the `yroom` communication runs through a worker process, we need inter-process communication.
+Configure the official Redis Channel Layer in your settings:
+
+```python
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
+```
+
+Make sure to have a Redis server running.
+
+
 ### Run yroom worker process
 
 In addition to your webserver with WebSockets support (e.g. daphne or uvicorn), you need to run a [channels worker](https://channels.readthedocs.io/en/stable/topics/worker.html). You can run the `yroom` worker implementation that supports graceful shutdown:
