@@ -13,7 +13,7 @@ import { Editor } from '@tiptap/vue-3';
 
 import * as Y from 'yjs';
 
-const wsUrl = `ws${window.location.protocol === 'https:' ? 's' : ''}://${window.location.host}/ws/text-editor-collab/1`
+const wsUrl = `ws${window.location.protocol === 'https:' ? 's' : ''}://${window.location.host}/ws/tiptap/test`
 const ydoc = new Y.Doc()
 const documentName = 'text'
 
@@ -42,15 +42,16 @@ Your `consumers.py` could look like this:
 from channels_yroom.consumer import YroomConsumer
 
 
-def get_room_name(room_name: str) -> str:
-    # The room prefix is 'tiptap-editor'
-    return "tiptap-editor.%s" % room_name
+def get_tiptap_room_name(room_name: str) -> str:
+    # The room prefix is 'textcollab_tiptap.'
+    return "textcollab_tiptap.%s" % room_name
 
 
-class TextEditorCollabConsumer(YroomConsumer):
+class TipTapConsumer(YroomConsumer):
     def get_room_name(self) -> str:
-        room_name = str(self.scope["url_route"]["kwargs"]["pk"])
-        return get_room_name(room_name)
+        room_name = self.scope["url_route"]["kwargs"]["room_name"]
+        return get_tiptap_room_name(room_name)
+
 ```
 
 Your `settings.py` should contain the following:
@@ -59,10 +60,12 @@ Your `settings.py` should contain the following:
 YROOM_ROOM_SETTINGS = {
     "tiptap-editor": {
         # HocuspocusProvider adds and expects a name prefix
-        "name_prefixed": True,
+        "PROTOCOL_NAME_PREFIX": True,
         # Since the server doesn't know the name on connect,
         # it has to wait for communication from client
-        "server_sync_first": False,
+        "SERVER_START_SYNC": False,
+        # HocuspocusProvider can only read one message per WS frame
+        "PROTOCOL_DISABLE_PIPELINING": True,
     }
 }
 ```
@@ -76,9 +79,10 @@ from . import consumers
 
 ws_urlpatterns = [
     re_path(
-        r"ws/text-editor-collab/(?P<pk>\d+)$",
-        consumers.TextEditorCollabConsumer.as_asgi(),
+        r"ws/tiptap/(?P<room_name>\w+)$",
+        consumers.TipTapConsumer.as_asgi()
     ),
 ]
 ```
 
+A full [Django Tiptap example can be found in the example directory of the repository](https://github.com/stefanw/channels-yroom/tree/main/example).
