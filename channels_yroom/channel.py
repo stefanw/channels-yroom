@@ -1,18 +1,14 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
-from typing import List, Optional
+from typing import Optional
 
 from channels.consumer import AsyncConsumer
 from yroom import YRoomManager, YRoomMessage
 
 from .conf import get_room_prefix, get_room_settings, get_settings
 from .storage import YDocStorage, get_ydoc_storage
-from .utils import (
-    YroomChannelMessage,
-    YroomChannelRPCMessage,
-    get_connection_group_name,
-)
+from .utils import YroomChannelMessage, YroomChannelRPCMessage
 
 logger = logging.getLogger(__name__)
 

@@ -5,12 +5,7 @@ from typing import Optional
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 from .conf import get_room_settings
-from .utils import (
-    YroomChannelMessage,
-    YroomChannelMessageType,
-    YroomChannelResponse,
-    get_connection_group_name,
-)
+from .utils import YroomChannelMessage, YroomChannelMessageType, YroomChannelResponse
 
 logger = logging.getLogger(__name__)
 
