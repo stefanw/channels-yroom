@@ -8,8 +8,9 @@
     {% vite_hmr_client %}
 </head>
 <body>
-    {{ room_name|json_script:"room-name" }}
+    <div id="editor-container"></div>
+    {{ room_settings|json_script:"room-settings" }}
     {% vite_asset 'frontend/main.js' %}
-    <a href="{% url 'save_room' room_name=room_name %}">Get Room Content</a>
+    <a href="{% url 'save_room-'|add:room_settings.editor room_name=room_settings.roomName %}">Get Room Content</a>
 </body>
 </html>

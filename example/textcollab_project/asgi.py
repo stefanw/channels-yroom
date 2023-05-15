@@ -14,13 +14,13 @@ from django.core.asgi import get_asgi_application
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "textcollab_project.settings")
 django_asgi_app = get_asgi_application()
 
+
+import textcollab.routing
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ChannelNameRouter, ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
 
-import textcollab.routing
 from channels_yroom.channel import YRoomChannelConsumer
-
 
 application = ProtocolTypeRouter(
     {

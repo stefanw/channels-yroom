@@ -193,3 +193,12 @@ LOGGING = {
         },
     },
 }
+
+YROOM_SETTINGS = {
+    "default": {},
+    "textcollab_tiptap": {
+        "SERVER_START_SYNC": False,
+        "PROTOCOL_NAME_PREFIX": True,
+        "PROTOCOL_DISABLE_PIPELINING": True,
+    },
+}
