@@ -22,7 +22,7 @@ Set up your WebSocket consumer in your app `consumers.py`.
 from channels_yroom.consumer import YroomConsumer
 
 class TextCollaborationConsumer(YroomConsumer):
-    def get_room_group_name(self) -> str:
+    def get_room_name(self) -> str:
         """
         Determine a unique name for this room, e.g. based on URL
         """
