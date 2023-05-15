@@ -1,5 +1,16 @@
 # Changelog
 
+
+## v0.0.5 – 16.5.2023
+
+- Add setting to disable pipelining of messages for TipTap integration
+- Fix bug where missing connect message would reset room
+- Use existing Websocket consumer channel for communication from `yroom` worker. Before an extra channel was used.
+
+## v0.0.4 – 4.5.2023
+
+- Fix bad worker configuration
+
 ## v0.0.3 – 3.5.2023
 
 - Change `YroomDocument` export API:
