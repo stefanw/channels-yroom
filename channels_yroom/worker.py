@@ -21,6 +21,7 @@ class YroomWorker:
             self.application = get_default_application()
         else:
             self.application = application
+        self.shutting_down = False
 
     def run(self):
         """
@@ -60,6 +61,9 @@ class YroomWorker:
         # but only on a new random channel
         # so we listen on the given channel and forward messages
         while True:
+            if self.shutting_down:
+                # Stop relaying messages when shutting down
+                break
             message = await self.channel_layer.receive(self.channel)
             if not message.get("type", None):
                 raise ValueError("Worker received message with no type.")
@@ -70,6 +74,9 @@ class YroomWorker:
         """
         Shuts down worker gracefully.
         """
+        if self.shutting_down:
+            return
+        self.shutting_down = True
         self._clear_signal_handlers(loop)
         logger.info(f"Received signal {signal.name}...")
         shutdown_message = {"type": "shutdown", "signal": signal.name}
