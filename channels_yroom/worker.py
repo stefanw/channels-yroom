@@ -11,6 +11,7 @@ def custom_exception_handler(loop, context):
     loop.default_exception_handler(context)
     exception = context.get('exception')
     if isinstance(exception, Exception):
+        logging.error(f"Caught exception: {context}")
         loop.stop()
 
 class YroomWorker:
