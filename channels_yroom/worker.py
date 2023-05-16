@@ -7,6 +7,12 @@ from channels.routing import get_default_application
 logger = logging.getLogger(__name__)
 
 
+def custom_exception_handler(loop, context):
+    loop.default_exception_handler(context)
+    exception = context.get('exception')
+    if isinstance(exception, Exception):
+        loop.stop()
+
 class YroomWorker:
     SIGNALS = (
         signal.SIGHUP,
@@ -28,6 +34,7 @@ class YroomWorker:
         Runs the asyncio event loop with our handler loop.
         """
         loop = asyncio.get_event_loop()
+        loop.set_exception_handler(custom_exception_handler)
         self._setup_signal_handlers(loop)
         try:
             loop.create_task(self.run_worker())
