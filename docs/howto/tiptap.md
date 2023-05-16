@@ -57,7 +57,7 @@ class TipTapConsumer(YroomConsumer):
 Your `settings.py` should contain the following:
 
 ```python
-YROOM_ROOM_SETTINGS = {
+YROOM_SETTINGS = {
     "tiptap-editor": {
         # HocuspocusProvider adds and expects a name prefix
         "PROTOCOL_NAME_PREFIX": True,
