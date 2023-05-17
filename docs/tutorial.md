@@ -53,11 +53,6 @@ application = ProtocolTypeRouter(
         "websocket": AllowedHostsOriginValidator(
             AuthMiddlewareStack(URLRouter(textcollab.routing.websocket_urlpatterns))
         ),
-        "channel": ChannelNameRouter(
-            {
-                "yroom": YRoomChannelConsumer.as_asgi(),
-            }
-        ),
     }
 )
 ```

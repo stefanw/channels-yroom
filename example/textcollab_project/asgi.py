@@ -17,21 +17,14 @@ django_asgi_app = get_asgi_application()
 
 import textcollab.routing
 from channels.auth import AuthMiddlewareStack
-from channels.routing import ChannelNameRouter, ProtocolTypeRouter, URLRouter
+from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
-
-from channels_yroom.channel import YRoomChannelConsumer
 
 application = ProtocolTypeRouter(
     {
         "http": django_asgi_app,
         "websocket": AllowedHostsOriginValidator(
             AuthMiddlewareStack(URLRouter(textcollab.routing.websocket_urlpatterns))
-        ),
-        "channel": ChannelNameRouter(
-            {
-                "yroom": YRoomChannelConsumer.as_asgi(),
-            }
         ),
     }
 )
