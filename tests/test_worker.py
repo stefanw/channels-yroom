@@ -3,11 +3,9 @@ from io import StringIO
 
 import pytest
 from channels.layers import get_channel_layer
-from channels.routing import ChannelNameRouter, ProtocolTypeRouter
 from channels.testing import WebsocketCommunicator
 from django.core.management import call_command
 
-from channels_yroom.channel import YRoomChannelConsumer
 from channels_yroom.conf import get_default_room_settings
 from channels_yroom.consumer import YroomConsumer
 from channels_yroom.management.commands.yroom import Command as YroomCommand
@@ -58,16 +56,6 @@ async def test_yroom_worker(settings, ydata):
     channel_layer = get_channel_layer()
     channel = get_default_room_settings()["CHANNEL_NAME"]
 
-    application = ProtocolTypeRouter(
-        {
-            "channel": ChannelNameRouter(
-                {
-                    "yroom": YRoomChannelConsumer.as_asgi(),
-                }
-            ),
-        }
-    )
-
     loop_state = {}
 
     class FakeSignal:
@@ -88,9 +76,7 @@ async def test_yroom_worker(settings, ydata):
 
     fake_loop = FakeLoop()
 
-    worker = YroomWorker(
-        channel=channel, channel_layer=channel_layer, application=application
-    )
+    worker = YroomWorker(channel=channel, channel_layer=channel_layer)
     worker._setup_signal_handlers(fake_loop)
     assert fake_loop.added_signals == set(worker.SIGNALS)
     worker_task = asyncio.create_task(worker.run_worker())
@@ -111,7 +97,7 @@ async def test_yroom_worker(settings, ydata):
     assert payload == ydata.SYNC_STEP_1_DATA
 
     fake_loop = FakeLoop()
-    await worker.shutdown_worker(FakeSignal, fake_loop)
+    await worker.shutdown_worker(fake_loop, FakeSignal)
     assert loop_state["stopped"]
     assert fake_loop.removed_signals == set(worker.SIGNALS)
 
