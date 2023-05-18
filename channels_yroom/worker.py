@@ -13,6 +13,7 @@ class YroomWorker:
         signal.SIGTERM,
         signal.SIGINT,
     )
+    consumer_class = YRoomChannelConsumer
 
     def __init__(self, channel, channel_layer):
         self.channel = channel
@@ -67,7 +68,7 @@ class YroomWorker:
         """
         Runs the consumer loop.
         """
-        self.consumer = YRoomChannelConsumer()
+        self.consumer = self.consumer_class()
         self.consumer.channel_layer = self.channel_layer
         self.consumer.base_send = self.receive_from_worker
 
