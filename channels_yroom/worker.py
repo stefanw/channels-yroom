@@ -77,8 +77,6 @@ class YroomWorker:
                 # Stop
                 break
             message = await self.input_queue.get()
-            if not message.get("type", None):
-                raise ValueError("Worker received message with no type.")
             # Dispatch directly to the consumer
             await self.consumer.dispatch(message)
 
