@@ -33,7 +33,7 @@ async def save_room(request, room_name, editor="prosemirror"):
         YDOC_XML_FRAGMENT_KEY = "prosemirror"
     elif editor == "tiptap":
         room_group_name = get_tiptap_room_name(room_name)
-        YDOC_XML_FRAGMENT_KEY = "default"
+        YDOC_XML_FRAGMENT_KEY = "content"
     doc = YroomDocument(room_group_name)
     try:
         result: Optional[str] = await doc.export_xml_fragment(YDOC_XML_FRAGMENT_KEY)

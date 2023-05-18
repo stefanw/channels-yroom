@@ -98,12 +98,12 @@ class YRoomChannelConsumer(AsyncConsumer):
         if not callable(manager_method):
             logger.warning("yroom consumer bad rpc method %s %s", room_name, method)
             return
-
+        logger.debug("yroom consumer rpc %s %s", room_name, method)
         async with self.try_room(room_name) as room_available:
             if not room_available:
                 # No room and no snapshot, send back empty result
                 await self.channel_layer.send(
-                    message["channel"],
+                    message["channel_name"],
                     {
                         "type": "rpc_response",
                         "result": None,
@@ -111,9 +111,15 @@ class YRoomChannelConsumer(AsyncConsumer):
                 )
                 return
             result = manager_method(room_name, *message["params"])
-
+        logger.debug(
+            "yroom consumer rpc response %s %s to %s: %s",
+            room_name,
+            method,
+            message["channel_name"],
+            result,
+        )
         await self.channel_layer.send(
-            message["channel"],
+            message["channel_name"],
             {
                 "type": "rpc_response",
                 "result": result,

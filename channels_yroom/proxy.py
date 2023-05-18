@@ -132,7 +132,7 @@ class YroomDocument:
             YroomChannelRPCMessage(
                 type=YroomChannelMessageType.rpc.value,
                 room=self.room_name,
-                channel=channel_name,
+                channel_name=channel_name,
                 method=method,
                 params=params,
             ),

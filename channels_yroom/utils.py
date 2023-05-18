@@ -28,7 +28,7 @@ class YroomChannelMessage(_YroomChannelMessage, total=False):
 class YroomChannelRPCMessage(TypedDict):
     type: str
     room: str
-    channel: str
+    channel_name: str
     method: str
     params: List[Any]
 
