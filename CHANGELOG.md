@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.0.6 – 18.5.2023
+
+- Restructure `yroom` worker to be not ASGI based
+- Add improved exception handling to `yroom` worker:
+    - exceptions are now detected, logged and worker gracefully shut down
 
 ## v0.0.5 – 16.5.2023
 
