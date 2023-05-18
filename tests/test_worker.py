@@ -6,6 +6,7 @@ from channels.layers import get_channel_layer
 from channels.testing import WebsocketCommunicator
 from django.core.management import call_command
 
+from channels_yroom.channel import YRoomChannelConsumer
 from channels_yroom.conf import get_default_room_settings
 from channels_yroom.consumer import YroomConsumer
 from channels_yroom.management.commands.yroom import Command as YroomCommand
@@ -109,3 +110,95 @@ async def test_yroom_worker(settings, ydata):
         await worker_task
     except asyncio.exceptions.CancelledError:
         pass
+
+
+@pytest.mark.django_db
+def test_worker_exception_handling(event_loop, capsys):
+    channel_layer = get_channel_layer()
+    channel = get_default_room_settings()["CHANNEL_NAME"]
+
+    channel_state = {"shutdown_called": False}
+
+    class TestException(Exception):
+        pass
+
+    class TestYroomChannelConsumer(YRoomChannelConsumer):
+        async def connect(self, message):
+            await super().connect(message)
+            raise TestException("Test exception")
+
+        async def shutdown(self, message):
+            channel_state["shutdown_called"] = True
+            await super().shutdown(message)
+
+    class TestYroomWorker(YroomWorker):
+        consumer_class = TestYroomChannelConsumer
+
+    worker = TestYroomWorker(channel=channel, channel_layer=channel_layer)
+    event_loop.set_exception_handler(worker.handle_exception)
+
+    app = YroomConsumer()
+    client_1 = WebsocketCommunicator(app, "/testws/")
+
+    async def connect_client():
+        connected, _ = await client_1.connect()
+        assert connected
+
+    event_loop.create_task(worker.run_worker())
+    event_loop.create_task(connect_client())
+    event_loop.run_forever()
+    event_loop.close()
+
+    captured = capsys.readouterr()
+    assert 'raise TestException("Test exception")' in captured.err
+    assert channel_state["shutdown_called"]
+    assert worker.shutting_down
+    assert event_loop.is_closed()
+
+
+@pytest.mark.django_db
+def test_worker_exception_handling_during_shutdown(event_loop, capsys, caplog):
+    channel_layer = get_channel_layer()
+    channel = get_default_room_settings()["CHANNEL_NAME"]
+
+    class TestException(Exception):
+        pass
+
+    class TestShutdownException(Exception):
+        pass
+
+    class TestYroomChannelConsumer(YRoomChannelConsumer):
+        async def connect(self, message):
+            await super().connect(message)
+            raise TestException("Test exception")
+
+        async def shutdown(self, message):
+            raise TestShutdownException("Test shutdown exception")
+
+    class TestYroomWorker(YroomWorker):
+        consumer_class = TestYroomChannelConsumer
+
+    worker = TestYroomWorker(channel=channel, channel_layer=channel_layer)
+    event_loop.set_exception_handler(worker.handle_exception)
+
+    app = YroomConsumer()
+    client_1 = WebsocketCommunicator(app, "/testws/")
+
+    async def connect_client():
+        connected, _ = await client_1.connect()
+        assert connected
+
+    event_loop.create_task(worker.run_worker())
+    event_loop.create_task(connect_client())
+    event_loop.run_forever()
+    event_loop.close()
+
+    captured = capsys.readouterr()
+    log_messages = [rec.message for rec in caplog.records]
+    assert 'raise TestException("Test exception")' in captured.err
+    assert (
+        "Caught exception while shutting down: Test shutdown exception" in log_messages
+    )
+
+    assert worker.shutting_down
+    assert event_loop.is_closed()

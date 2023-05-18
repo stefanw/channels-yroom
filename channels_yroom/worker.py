@@ -32,7 +32,6 @@ class YroomWorker:
             loop.run_forever()
         finally:
             loop.close()
-            logger.info("Shutdown worker complete")
 
     def _setup_signal_handlers(self, loop):
         for sig in self.SIGNALS:
@@ -124,8 +123,8 @@ class YroomWorker:
         [task.cancel() for task in tasks]
         logger.info(f"Cancelling {len(tasks)} outstanding tasks")
         await asyncio.gather(*tasks, return_exceptions=True)
-
         loop.stop()
+        logger.info("Shutdown worker complete")
 
     async def receive_from_worker(self, message):
         assert message["type"] == "shutdown.complete"
