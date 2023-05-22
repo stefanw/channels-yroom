@@ -102,3 +102,14 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+
+[tool.hatch.envs.e2e]
+skip-install = true
+detached = true
+dependencies = [
+  "pytest",
+  "pytest-playwright",
+]
+
+[tool.hatch.envs.e2e.scripts]
+test = "example/run_e2e_tests.sh"
