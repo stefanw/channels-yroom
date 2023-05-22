@@ -4,6 +4,6 @@ redis==4.5.5
 uvicorn[standard]==0.21.1
 Django==4.2.1
 django-vite==2.0.2
-channels-yroom==0.0.5
+channels-yroom==0.0.6
 psycopg[binary]==3.1.8
 whitenoise==6.4.0
