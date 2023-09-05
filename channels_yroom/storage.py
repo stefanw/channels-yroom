@@ -49,7 +49,7 @@ class YDocDatabaseStorage(YDocStorage):
         return await get_db_snapshot(name)
 
     async def save_snapshot(self, name: str, data: bytes) -> None:
-        return await save_db_snapshot(name, data)
+        await save_db_snapshot(name, data)
 
 
 storage_cache = {}

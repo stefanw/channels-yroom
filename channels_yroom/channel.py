@@ -54,7 +54,7 @@ class YRoomChannelConsumer(AsyncConsumer):
         logger.debug("yroom connect, no room yet %s %s", room_name, conn_id)
         storage = self.get_storage(room_name)
         logger.debug("Using yroom storage %s of %s", storage, self.storages)
-        snapshot = await storage.get_snapshot(room_name)
+        snapshot = bytes(await storage.get_snapshot(room_name))
         logger.debug("Found snapshot %s", snapshot)
         if snapshot:
             logger.debug("yroom connect, snapshot found %s %s", room_name, snapshot)
