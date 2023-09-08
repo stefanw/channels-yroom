@@ -4,6 +4,18 @@ from asyncio import Task
 from typing import Dict, Callable
 
 from .conf import get_room_settings
+from .utils import YroomChannelMessage
+
+
+AWARENESS_START = b'{'
+
+
+def non_awareness_payload_size(payload: bytes) -> int:
+    """Payload size without trailing awareness JSON object."""
+    if AWARENESS_START in payload:
+        return payload.index(AWARENESS_START)
+
+    return len(payload)
 
 
 class Autosave:
@@ -51,6 +63,14 @@ class Autosave:
         task = asyncio.create_task(self.snapshot_room_soon(room_name))
         task.add_done_callback(lambda _task: self.forget(room_name))
         self.saver_tasks[room_name] = task
+
+    def nudge_if_changed(self, room_message: str, message: YroomChannelMessage) -> None:
+        """Nudge if there was a possible change deduced from the message."""
+        # TODO: There must be a better way?!
+        size = non_awareness_payload_size(message['payload'])
+        changed = size > 15
+        if changed:
+            self.nudge(room_message)
 
     async def snapshot_room_soon(self, room_name: str):
         """Snapshot room in due time."""
