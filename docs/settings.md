@@ -36,7 +36,6 @@ Default: `30` (in seconds). When the last client disconnects the worker will kee
 ### `"STORAGE_BACKEND"`
 Default: `"channels_yroom.storage.YDocDatabaseStorage"`. Storage backend to use.
 
-
 ### `"PROTOCOL_VERSION"`
 Default: `1`. Yjs protocol encoder/decoder version to use. Currently untested but also possible value is `2`.
 
@@ -45,3 +44,6 @@ Default: `False`. Whether to read and add a string prefix to the network protoco
 
 ### `"SERVER_START_SYNC"`
 Default: `True`. Whether the server sends a sync request and awareness update on connect.
+
+### `"AUTOSAVE_DELAY"`
+Default: `None` deactivated. Snapshot room after a period of inactivity. Save after `AUTOSAVE_DELAY` many seconds. Strictly positive delay value. Note that this can lead to redundant saves.
