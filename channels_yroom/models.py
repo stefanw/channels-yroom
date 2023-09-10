@@ -1,10 +1,16 @@
+from typing import Optional
+
 from django.db import models
 
 
 class YDocUpdateManager(models.Manager):
-    def get_snapshot(self, name):
+    def get_snapshot(self, name) -> Optional[bytes]:
         try:
-            return self.get(name=name).data
+            result = self.get(name=name).data
+            if not isinstance(result, bytes):
+                # Postgres returns memoryview
+                return bytes(result)
+            return result
         except YDocUpdate.DoesNotExist:
             return None
 

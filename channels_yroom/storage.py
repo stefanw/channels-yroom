@@ -35,13 +35,13 @@ class YDocMemoryStorage(YDocStorage):
 
 
 @sync_to_async
-def get_db_snapshot(room_name: str):
+def get_db_snapshot(room_name: str) -> Optional[bytes]:
     return YDocUpdate.objects.get_snapshot(room_name)
 
 
 @sync_to_async
-def save_db_snapshot(room_name: str, data: bytes):
-    return YDocUpdate.objects.save_snapshot(room_name, data)
+def save_db_snapshot(room_name: str, data: bytes) -> None:
+    YDocUpdate.objects.save_snapshot(room_name, data)
 
 
 class YDocDatabaseStorage(YDocStorage):
@@ -49,7 +49,7 @@ class YDocDatabaseStorage(YDocStorage):
         return await get_db_snapshot(name)
 
     async def save_snapshot(self, name: str, data: bytes) -> None:
-        return await save_db_snapshot(name, data)
+        await save_db_snapshot(name, data)
 
 
 storage_cache = {}
