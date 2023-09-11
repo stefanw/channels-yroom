@@ -1,7 +1,7 @@
 import asyncio
 import time
 from asyncio import Task
-from typing import Dict, Callable
+from typing import Callable, Dict
 
 from .conf import get_room_settings
 from .utils import YroomChannelMessage
@@ -22,9 +22,9 @@ class Autosave:
         saver_tasks: Saver tasks per room.
     """
 
-    def __init__(self, consumer: "YRoomChannelConsumer"):
+    def __init__(self, consumer: YRoomChannelConsumer):
         """Args:
-            consumer: YroomConsumer instance used for snapshot_room() saving.
+        consumer: YroomConsumer instance used for snapshot_room() saving.
         """
         self.consumer = consumer
         self.time_func: Callable[[], float] = time.perf_counter
