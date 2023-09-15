@@ -78,7 +78,9 @@ class YRoomChannelConsumer(AsyncConsumer):
         result = self.room_manager.handle_message(
             room_name, conn_id, message["payload"], options
         )
-        self.autosave.nudge_if_changed(room_name, message)
+        if result.has_edits:
+            self.autosave.nudge(room_name)
+
         await self.respond(result, room_name=room_name, channel_name=channel_name)
 
     @asynccontextmanager
@@ -186,7 +188,6 @@ class YRoomChannelConsumer(AsyncConsumer):
         if room_name in self.cleanup_tasks:
             self.cleanup_tasks[room_name].cancel()
 
-        self.autosave.forget(room_name)
         task = asyncio.create_task(self.remove_room_soon(room_name))
         self.cleanup_tasks[room_name] = task
         task.add_done_callback(lambda _task: self.cleanup_tasks.pop(room_name, None))
@@ -200,6 +201,7 @@ class YRoomChannelConsumer(AsyncConsumer):
     async def remove_room(self, room_name: str):
         if self.room_manager.is_room_alive(room_name):
             return
+        self.autosave.forget(room_name)
         logger.debug("Snapshot room %s", room_name)
         await self.snapshot_room(room_name)
         logger.debug("Remove empty room %s", room_name)
