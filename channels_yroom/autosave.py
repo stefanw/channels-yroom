@@ -1,10 +1,12 @@
 import asyncio
 import time
 from asyncio import Task
-from typing import Callable, Dict
+from typing import TYPE_CHECKING, Callable, Dict
 
 from .conf import get_room_settings
-from .utils import YroomChannelMessage
+
+if TYPE_CHECKING:
+    from .consumer import YRoomChannelConsumer
 
 
 class Autosave:
