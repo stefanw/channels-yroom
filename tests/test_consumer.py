@@ -301,7 +301,7 @@ async def test_export(settings, yroom_worker):
     result = await proxy.export_map("map")
     assert result == test_map
     result = await proxy.export_xml_element("xml_element")
-    assert result == "<UNDEFINED><p>hello</p>world</UNDEFINED>"
+    assert result == "<xml_element><p>hello</p>world</xml_element>"
 
     # Non-existing elements return their defaults
     result = await proxy.export_text("no-text")
@@ -311,7 +311,6 @@ async def test_export(settings, yroom_worker):
     result = await proxy.export_map("no-map")
     assert result == {}
     result = await proxy.export_xml_element("no-xml_element")
-    # TODO: checkout this weirdness
     assert result == "<no-xml_element></no-xml_element>"
 
 
