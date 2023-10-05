@@ -20,6 +20,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
+
 dependencies = ["Django >= 3.2", "channels >= 4.0", "yroom >= 0.0.10"]
 dynamic = ["version"]
 
