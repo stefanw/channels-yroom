@@ -9,9 +9,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
 keywords = []
-authors = [
-  { name = "Stefan Wehrmeyer", email = "mail@stefanwehrmeyer.com" },
-]
+authors = [{ name = "Stefan Wehrmeyer", email = "mail@stefanwehrmeyer.com" }]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
@@ -22,11 +20,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = [
-  "Django >= 3.2",
-  "channels >= 4.0",
-  "yroom >= 0.0.8",
-]
+dependencies = ["Django >= 3.2", "channels >= 4.0", "yroom >= 0.0.10"]
 dynamic = ["version"]
 
 [project.urls]
@@ -62,26 +56,15 @@ python = ["3.8", "3.9", "3.10", "3.11"]
 [tool.hatch.envs.docs]
 skip-install = true
 detached = true
-dependencies = [
-  "mkdocs",
-  "mkdocstrings[python]",
-  "mkdocs-mermaid2-plugin",
-]
+dependencies = ["mkdocs", "mkdocstrings[python]", "mkdocs-mermaid2-plugin"]
 [tool.hatch.envs.docs.scripts]
-serve = [
-  "mkdocs serve -a 127.0.0.1:8001",
-]
-freeze = [
-  "pip freeze > docs/requirements.txt",
-]
+serve = ["mkdocs serve -a 127.0.0.1:8001"]
+freeze = ["pip freeze > docs/requirements.txt"]
 
 [tool.hatch.envs.lint]
 skip-install = true
 detached = true
-dependencies = [
-  "black",
-  "ruff",
-]
+dependencies = ["black", "ruff"]
 
 [tool.hatch.envs.lint.scripts]
 check = [
@@ -92,24 +75,15 @@ check = [
 [tool.coverage.run]
 branch = true
 parallel = true
-omit = [
-  "channels_yroom/__about__.py",
-]
+omit = ["channels_yroom/__about__.py"]
 
 [tool.coverage.report]
-exclude_lines = [
-  "no cov",
-  "if __name__ == .__main__.:",
-  "if TYPE_CHECKING:",
-]
+exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 
 [tool.hatch.envs.e2e]
 skip-install = true
 detached = true
-dependencies = [
-  "pytest",
-  "pytest-playwright",
-]
+dependencies = ["pytest", "pytest-playwright"]
 
 [tool.hatch.envs.e2e.scripts]
 test = "example/run_e2e_tests.sh"

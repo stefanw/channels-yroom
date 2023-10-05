@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import Any, List, Optional, TypedDict
 
+from yroom import YRoomClientOptions
+
 
 class YroomChannelResponse(TypedDict):
     type: str
@@ -23,6 +25,7 @@ class _YroomChannelMessage(TypedDict):  # implicitly total=True
 
 class YroomChannelMessage(_YroomChannelMessage, total=False):
     payload: bytes
+    options: Optional[YRoomClientOptions]
 
 
 class YroomChannelRPCMessage(TypedDict):

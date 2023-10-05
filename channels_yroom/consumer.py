@@ -3,6 +3,7 @@ import random
 from typing import Optional
 
 from channels.generic.websocket import AsyncWebsocketConsumer
+from yroom import YRoomClientOptions
 
 from .conf import get_room_settings
 from .utils import YroomChannelMessage, YroomChannelMessageType, YroomChannelResponse
@@ -37,6 +38,16 @@ class YroomConsumer(AsyncWebsocketConsumer):
         """  # noqa: E501
         await self.join_room()
 
+    async def get_client_options(self) -> YRoomClientOptions:
+        """
+        Get the yroom connection options for the client.
+        This determines if the client is read-only or not.
+
+        Returns:
+            YRoomClientOptions
+        """
+        return YRoomClientOptions()
+
     async def join_room(self) -> None:
         # Join room group
         self.room_name = self.get_room_name()
@@ -46,6 +57,7 @@ class YroomConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.room_name, self.channel_name)
         await self.accept()
         self.room_settings = get_room_settings(self.room_name)
+        options = await self.get_client_options()
         await self.channel_layer.send(
             self.room_settings["CHANNEL_NAME"],
             YroomChannelMessage(
@@ -53,6 +65,7 @@ class YroomConsumer(AsyncWebsocketConsumer):
                 room=self.room_name,
                 conn_id=self.conn_id,
                 channel_name=self.channel_name,
+                options=options,
             ),
         )
 
@@ -64,6 +77,7 @@ class YroomConsumer(AsyncWebsocketConsumer):
         logger.debug("leaving room %s as %s", self.room_name, self.conn_id)
         await self.channel_layer.group_discard(self.room_name, self.channel_name)
         # Tell yroom worker that client disconnected
+        options = await self.get_client_options()
         await self.channel_layer.send(
             self.room_settings["CHANNEL_NAME"],
             YroomChannelMessage(
@@ -71,6 +85,7 @@ class YroomConsumer(AsyncWebsocketConsumer):
                 room=self.room_name,
                 conn_id=self.conn_id,
                 channel_name=self.channel_name,
+                options=options,
             ),
         )
 
@@ -82,6 +97,7 @@ class YroomConsumer(AsyncWebsocketConsumer):
             await self.handle_room_message(bytes_data)
 
     async def handle_room_message(self, bytes_data: bytes) -> None:
+        options = await self.get_client_options()
         await self.channel_layer.send(
             self.room_settings["CHANNEL_NAME"],
             YroomChannelMessage(
@@ -90,6 +106,7 @@ class YroomConsumer(AsyncWebsocketConsumer):
                 conn_id=self.conn_id,
                 channel_name=self.channel_name,
                 payload=bytes_data,
+                options=options,
             ),
         )
 
