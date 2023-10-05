@@ -1,4 +1,4 @@
-FROM node:16-alpine as jsbuilder
+FROM node:20-alpine as jsbuilder
 WORKDIR /usr/src/js
 COPY example/package.json example/package-lock.json /usr/src/js/
 RUN npm install
