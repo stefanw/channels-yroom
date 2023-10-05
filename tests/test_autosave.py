@@ -1,7 +1,7 @@
 import asyncio
 import pytest
 
-from channels_yroom.conf import get_room_settings, get_default_room_settings
+from channels_yroom.conf import get_default_room_settings
 from channels_yroom.autosave import Autosave
 
 
