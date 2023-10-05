@@ -8,7 +8,7 @@ class YDocUpdateManager(models.Manager):
         try:
             result = self.get(name=name).data
             if not isinstance(result, bytes):
-                # Postgres returns memoryview
+                # Postgres on psycopg2 returns memoryview
                 return bytes(result)
             return result
         except YDocUpdate.DoesNotExist:
