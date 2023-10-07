@@ -24,7 +24,7 @@ class Autosave:
         saver_tasks: Saver tasks per room.
     """
 
-    def __init__(self, consumer: YRoomChannelConsumer):
+    def __init__(self, consumer: 'YRoomChannelConsumer'):
         """Args:
         consumer: YroomConsumer instance used for snapshot_room() saving.
         """
