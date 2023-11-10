@@ -6,6 +6,7 @@ from typing import Optional
 from channels.consumer import AsyncConsumer
 from yroom import YRoomClientOptions, YRoomManager, YRoomMessage
 
+from .autosave import Autosave
 from .conf import get_room_prefix, get_room_settings, get_settings
 from .storage import YDocStorage, get_ydoc_storage
 from .utils import YroomChannelMessage, YroomChannelRPCMessage
@@ -18,6 +19,7 @@ class YRoomChannelConsumer(AsyncConsumer):
         self.room_manager: YRoomManager = YRoomManager(get_settings())
         self.cleanup_tasks = {}
         self.storages: dict[str, YDocStorage] = {}
+        self.autosave = Autosave(consumer=self)
 
     def get_storage(self, room_name):
         prefix = get_room_prefix(room_name)
@@ -76,6 +78,9 @@ class YRoomChannelConsumer(AsyncConsumer):
         result = self.room_manager.handle_message(
             room_name, conn_id, message["payload"], options
         )
+        if result.has_edits:
+            self.autosave.nudge(room_name)
+
         await self.respond(result, room_name=room_name, channel_name=channel_name)
 
     @asynccontextmanager
@@ -196,6 +201,7 @@ class YRoomChannelConsumer(AsyncConsumer):
     async def remove_room(self, room_name: str):
         if self.room_manager.is_room_alive(room_name):
             return
+        self.autosave.forget(room_name)
         logger.debug("Snapshot room %s", room_name)
         await self.snapshot_room(room_name)
         logger.debug("Remove empty room %s", room_name)
@@ -218,6 +224,7 @@ class YRoomChannelConsumer(AsyncConsumer):
 
     async def shutdown(self, message) -> None:
         logger.info("Shutdown event received")
+        await self.autosave.cancel_all()
         cleanup_tasks = list(self.cleanup_tasks.values())
         for task in cleanup_tasks:
             task.cancel()

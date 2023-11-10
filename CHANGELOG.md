@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased - 8.9.2023
+
+- Optional autosaving per room after a certain period of editing inactivity
+
 ## v0.0.6 – 18.5.2023
 
 - Restructure `yroom` worker to be not ASGI based

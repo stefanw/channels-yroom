@@ -9,6 +9,7 @@ DEFAULTS = {
     "PROTOCOL_VERSION": 1,
     "PROTOCOL_NAME_PREFIX": False,
     "SERVER_START_SYNC": True,
+    "AUTOSAVE_DELAY": None,  # None for disabled or in strictly positive seconds
 }
 
 
