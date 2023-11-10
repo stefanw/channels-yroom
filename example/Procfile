@@ -1,0 +1,4 @@
+web: python manage.py runserver
+worker: PYTHONUNBUFFERED=1 RUST_BACKTRACE=1 python manage.py yroom
+frontend: npm run dev
+redis: redis-server
